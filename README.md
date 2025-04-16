@@ -1,2 +1,2 @@
 # MCLLM
-Multi-modal composite large language models for proteins
+A zero-shot, multi-modal, contrastive learning model for protein function prediction
