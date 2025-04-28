@@ -13,6 +13,7 @@ from utils import get_model_size_gb, load_pickle, save_ckp, load_ckp
 import yaml
 import random
 import numpy as np
+from num2words import num2words
 
 
 def set_seed(seed):
@@ -88,7 +89,7 @@ def run_epoch(model, dataloader, labels, criteria, metrics, optimizer=None, is_t
                         div_loss = criteria["diversity"](expert_outputs[f'{pair1}_modality']) + \
                                 criteria["diversity"](expert_outputs[f'{pair2}_modality'])
                         
-                        loss = cls_loss + 0.1 * div_loss +  0.5 * con_loss
+                        loss = cls_loss #+ 0.01 * div_loss #+  0.5 * con_loss
                         
                         counts[f'{pair1}'] += 1
                         counts[f'{pair2}'] += 1
@@ -203,7 +204,7 @@ if __name__ == '__main__':
 
     args.cuda = not args.no_cuda and torch.cuda.is_available()
     if args.cuda:
-        args.device = "cuda:0"
+        args.device = "cuda:1"
     else:
         args.device = "cpu"
 
@@ -231,9 +232,12 @@ if __name__ == '__main__':
     
 
     model = SeqBindClassifier(config=config, go_ontology=args.go_ontology).to(args.device)
+    _ckp_file = '/home/fbqc9/Workspace/MCLLM_DATA/DATA/saved_models/pretrained_ontology.pt'
+    model = load_ckp(filename=_ckp_file, model=model, model_only=True, strict=False) 
     print(model)
 
-    '''total_params = sum(p.numel() for p in model.parameters())
+
+    total_params = sum(p.numel() for p in model.parameters())
     print(f"Total parameters entire model: {num2words(total_params), total_params}")
     print("********************************************")
 
@@ -260,7 +264,7 @@ if __name__ == '__main__':
     sub_model = model.get_submodule("modality_encoder").get_submodule("Interpro_modality")
     total_params = sum(p.numel() for p in sub_model.parameters())
     print(f"Total parameters interpro: {num2words(total_params), total_params}")
-    print("********************************************")'''
+    print("********************************************")
 
 
     criteria = { 

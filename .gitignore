@@ -1,0 +1,7 @@
+figures/
+wandb/
+__pycache__/
+logs/
+evaluation/
+temp/
+*.pyc

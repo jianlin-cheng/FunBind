@@ -202,9 +202,9 @@ if __name__ == '__main__':
     parser.add_argument('--lr', type=float, default=0.0005, help='Initial learning rate.')
     parser.add_argument('--train_batch', type=int, default=512, help='Training batch size.')
     parser.add_argument('--valid_batch', type=int, default=512, help='Validation batch size.')
-    parser.add_argument('--wandb', default=True, help='Send to wandb')
-    parser.add_argument('--save_model', default=True, help='Save model.')
-    parser.add_argument('--load_weights', default=True, help='Load saved model.')
+    parser.add_argument('--wandb', default=False, help='Send to wandb')
+    parser.add_argument('--save_model', default=False, help='Save model.')
+    parser.add_argument('--load_weights', default=False, help='Load saved model.')
     parser.add_argument('--weight_decay', type=float, default=1e-5, help='Weight decay for optimizer.')
 
     args = parser.parse_args()
@@ -245,10 +245,9 @@ if __name__ == '__main__':
     }
 
 
-    model = SeqBindPretrain(config=config, ontology=True).to(args.device)
+    model = SeqBindPretrain(config=config).to(args.device)
     print(model)
 
-    exit()
 
     total_params = sum(p.numel() for p in model.parameters())
     trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
