@@ -12,20 +12,21 @@ It supports both direct `classification` and `zero-shot` prediction of novel fun
 ## Contents
 
 - [Installation](#installation)
-- [Dataset](#tutorials)
+- [Dataset](#dataset)
 - [Inference](#how-to-prepare-posebench-data)
-- [Zero-shot Inference](#available-inference-methods)
-- [Classification](#how-to-run-a-sweep-of-benchmarking-experiments)
+    - [Zero-shot Inference](#zero-shot-inference)
+    - [Classification](#function-classification)
 - [Training](#how-to-run-inference-with-individual-methods)
-- [Self- supPretraining](#how-to-run-inference-with-a-method-ensemble)
-- [Training](#how-to-create-comparative-plots-of-inference-results)
-- [Acknowledgements](#acknowledgements)
-- [Citing this work](#citing-this-work)
-- [Bonus](#bonus)
+    - [Self- supPretraining](#how-to-run-inference-with-a-method-ensemble)
+    - [Training](#how-to-create-comparative-plots-of-inference-results)
+- [License](#license)
+- [Citing this work](#reference)
 
 
 
 ## Installation
+
+<details>
 To get started, clone the repository and navigate to the project directory:
 ```
 git clone https://github.com/jianlin-cheng/FunBind.git
@@ -37,6 +38,7 @@ Then, create the environment and activate it by running:
 conda env create -f FunBind.yml
 conda activate FunBind
 ```
+</details>
 
 
 ## Dataset 
@@ -48,12 +50,9 @@ conda activate FunBind
 ## Inference
 <details>
 
-</details>
-
-## Zero-shot Inference
-<details>
 
 
+### Zero-shot Inference
 
 Feature Extraction and Comparison Across Multiple Modalities (e.g., Sequence, Structure, Text, and Domain Annotations)
 
@@ -122,19 +121,19 @@ print(
 
 ```
 
-</details>
 
-## Function Classification
+### Function Classification
 
-<details>
 ```bash
 python train.py --epochs [Number_epoch] --folder [intermediate_folder]
 ```
+
 </details>
 
+## Training
+<details>
 
-# Training
-<details></details>
+</details>
 
 ## Developer
 
