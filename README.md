@@ -13,10 +13,10 @@ It supports both direct `classification` and `zero-shot` prediction of novel fun
 
 - [Installation](#installation)
 - [Dataset](#dataset)
-- [Inference](#how-to-prepare-posebench-data)
+- [Inference](#inference)
     - [Zero-shot Inference](#zero-shot-inference)
     - [Classification](#function-classification)
-- [Training](#how-to-run-inference-with-individual-methods)
+- [Training](#training)
     - [Self- supPretraining](#how-to-run-inference-with-a-method-ensemble)
     - [Training](#how-to-create-comparative-plots-of-inference-results)
 - [License](#license)
