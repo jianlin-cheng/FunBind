@@ -7,7 +7,7 @@ import wandb
 from Loss import  InfoNCELoss, DiversityLoss
 from Metrics import PreRecF
 from data_processing.dataset import CustomDataset, CustomDataCollator
-from models.model import SeqBind
+from models.model import SeqBindClassifier
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
 from utils import get_model_size_gb, load_pickle, save_ckp, load_ckp
 import yaml
@@ -224,13 +224,13 @@ if __name__ == '__main__':
     }
 
 
-    given_name = "mulitstep_pretrain_final"
+    given_name = "unfrozen"
 
     groundtruth = load_pickle("/home/fbqc9/Workspace/MCLLM_DATA/DATA/data/labels/{}_labels".format(args.go_ontology))
     info_acc = load_pickle("/home/fbqc9/Workspace/MCLLM_DATA/DATA/data/labels/{}_ia".format(args.go_ontology))
     
 
-    model = SeqBind(config=config, go_ontology=args.go_ontology).to(args.device)
+    model = SeqBindClassifier(config=config, go_ontology=args.go_ontology).to(args.device)
     print(model)
 
     '''total_params = sum(p.numel() for p in model.parameters())

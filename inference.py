@@ -4,7 +4,7 @@ import torch
 from Metrics import PreRecF
 from data_processing.extract_data import combine_modalities
 from data_processing.utils import load_pickle, save_pickle
-from models.model import SeqBind, SeqBindClassifier
+from models.model import SeqBindClassifier
 from utils import load_ckp, load_config, load_graph
 from transformers import EsmTokenizer, T5Tokenizer, AutoTokenizer
 from transformers import EsmModel, T5EncoderModel, AutoModel, AutoTokenizer
@@ -214,10 +214,22 @@ def main():
     modalities_pred = ["Sequence", "Structure", "Text", "Interpro"]
 
 
-    thresholds = {
+    '''thresholds = {
         "BP": [0.3, 0.1, 0.5, 0.2],
         "CC": [0.3, 0.1, 0.4, 0.2],
         "MF": [0.3, 0.1, 0.3, 0.3]
+    }'''
+
+    thresholds_wo_structure = {
+        "BP": [0.2, 0.0, 0.7, 0.1],
+        "CC": [0.3, 0.0, 0.6, 0.1],
+        "MF": [0.3, 0.0, 0.4, 0.3]
+    }
+
+    thresholds_w_structure = {
+         "BP": [0.2, 0.1, 0.6, 0.1],
+         "CC": [0.3, 0.1, 0.5, 0.1],
+         "MF": [0.2, 0.1, 0.4, 0.3]
     }
 
     FUNC_DICT = {
@@ -307,8 +319,7 @@ def main():
         "Sequence" : {},
         "Structure": {},
         "Text": {}, 
-        "Interpro": {},
-        "Combined": {}
+        "Interpro": {}
     }
 
     with torch.no_grad():
@@ -343,19 +354,32 @@ def main():
 
                     predictions_dict[mod][protein] = protein_scores
 
+        thresholds_wo_structure
 
-        predictions_dict["Combined"] = fuse_predictions(predictions_dict, 
-                                modality_weights={"Sequence": thresholds[ontology][0], 
-                                                  "Structure": thresholds[ontology][1],
-                                                  "Text": thresholds[ontology][2], 
-                                                  "Interpro": thresholds[ontology][3]},
+    Consensus_w_structure = fuse_predictions(predictions_dict, 
+                                modality_weights={"Sequence": thresholds_w_structure[ontology][0], 
+                                                  "Structure": thresholds_w_structure[ontology][1],
+                                                  "Text": thresholds_w_structure[ontology][2], 
+                                                  "Interpro": thresholds_w_structure[ontology][3]},
                                 go_terms_list=go_terms_list,
                                 go_graph=go_graph,
                                 go_set=go_set)
 
+    Consensus_wo_structure = fuse_predictions(predictions_dict, 
+                                modality_weights={"Sequence": thresholds_wo_structure[ontology][0], 
+                                                  "Structure": thresholds_wo_structure[ontology][1],
+                                                  "Text": thresholds_wo_structure[ontology][2], 
+                                                  "Interpro": thresholds_wo_structure[ontology][3]},
+                                go_terms_list=go_terms_list,
+                                go_graph=go_graph,
+                                go_set=go_set)
+    
+
+    predictions_dict["Consensus_wo_structure"] = Consensus_wo_structure
+    predictions_dict['Consensus_w_structure'] = Consensus_w_structure
     
     for mod, protein_predictions in predictions_dict.items():
-        with open(f"/home/fbqc9/Workspace/MCLLM/evaluation/ablation/{ontology}/{mod}_{model_name}.tsv", "w") as f:
+        with open(f"/home/fbqc9/Workspace/MCLLM/evaluation/predictions/{ontology}/{mod}_{model_name}.tsv", "w") as f:
             for protein, go_term_scores in protein_predictions.items():
                 for go_term, score in go_term_scores.items():
                     if score >= 0.01:
