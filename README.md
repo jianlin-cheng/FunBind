@@ -8,7 +8,22 @@ It supports both direct `classification` and `zero-shot` prediction of novel fun
 
 ![Method overview ](model.png)
 
-# Usage
+
+## Contents
+
+- [Installation](#installation)
+- [Dataset](#tutorials)
+- [Inference](#how-to-prepare-posebench-data)
+- [Zero-shot Inference](#available-inference-methods)
+- [Classification](#how-to-run-a-sweep-of-benchmarking-experiments)
+- [Training](#how-to-run-inference-with-individual-methods)
+- [Self- supPretraining](#how-to-run-inference-with-a-method-ensemble)
+- [Training](#how-to-create-comparative-plots-of-inference-results)
+- [Acknowledgements](#acknowledgements)
+- [Citing this work](#citing-this-work)
+- [Bonus](#bonus)
+
+
 
 ## Installation
 To get started, clone the repository and navigate to the project directory:
@@ -24,9 +39,21 @@ conda activate FunBind
 ```
 
 
-# Inference
+## Dataset 
+
+<details>
+
+</details>
+
+## Inference
+<details>
+
+</details>
 
 ## Zero-shot Inference
+<details>
+
+
 
 Feature Extraction and Comparison Across Multiple Modalities (e.g., Sequence, Structure, Text, and Domain Annotations)
 
@@ -95,18 +122,23 @@ print(
 
 ```
 
+</details>
+
 ## Function Classification
 
+<details>
 ```bash
 python train.py --epochs [Number_epoch] --folder [intermediate_folder]
 ```
+</details>
 
 
 # Training
-
+<details></details>
 
 ## Developer
 
+<details></details>
 ```
 Frimpong Boadu
 Deparment of Computer Science
@@ -114,8 +146,10 @@ University of Missouri
 Columbia, MO 65211, USA
 Email: fbqc9@missouri.edu
 ```
-## Contact
 
+
+## Contact
+<details>
 ```
 Jianlin (Jack) Cheng, PhD, AAAS Fellow
 Curators' Distinguished Professor
@@ -125,10 +159,12 @@ University of Missouri
 Columbia, MO 65211, USA
 Email: chengji@missouri.edu
 ```
+</details>
 
 ## License
 This project is covered under the MIT License
 
 ## Reference
-
+<details>
 FunBind: A multimodal foundational AI model for improving protein function prediction.
+</details>
