@@ -1,0 +1,67 @@
+config1: 
+  Sequence:
+    model: esm2_t48
+    input_dim: 5120
+  Structure:
+    model: prost5
+    input_dim: 1024
+  Text:
+    model: llama2
+    input_dim: 4096
+  Interpro:
+    model: llama2
+    input_dim: 4096
+  Ontology:
+    model: llama2
+    input_dim: 4096
+
+
+## Biobert Test
+config_biobert: 
+  Sequence:
+    model: esm2_t48
+    input_dim: 5120
+  Structure:
+    model: prost5
+    input_dim: 1024
+  Text:
+    model: biobert
+    input_dim: 1024
+  Interpro:
+    model: biobert
+    input_dim: 1024
+  Ontology:
+    model: llama2
+    input_dim: 4096
+
+
+## Prost5 Sequence
+config_prostt5: 
+  Sequence:
+    model: prost5
+    input_dim: 1024
+    output_dim: 1024
+  Structure:
+    model: prost5
+    input_dim: 1024
+    output_dim: 1024
+  Text:
+    model: llama2
+    input_dim: 4096
+    output_dim: 1024
+  Interpro:
+    model: llama2
+    input_dim: 4096
+    output_dim: 1024
+  Ontology:
+    model: llama2
+    input_dim: 4096
+
+
+
+training:
+  batch_size: 32
+  learning_rate: 0.001
+prost5:
+      model: Rostlab/ProstT5
+      tokenizer: Rostlab/ProstT5
