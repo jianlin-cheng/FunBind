@@ -17,23 +17,31 @@ It supports both direct `classification` and `zero-shot` prediction of novel fun
     - [Zero-shot Inference](#zero-shot-inference)
     - [Classification](#function-classification)
 - [Training](#training)
-    - [Self- supPretraining](#how-to-run-inference-with-a-method-ensemble)
-    - [Training](#how-to-create-comparative-plots-of-inference-results)
+    - [Self-supervised Pretraining](#self-supervised-pretraining)
+    - [Supervised Function Classification via Fine-Tuning](#supervised-function-classification-via-fine-tuning)
 - [License](#license)
 - [Citing this work](#reference)
 
 
 
 ## Installation
+#### To get started with FunBind, follow these steps:
 
 <details>
-To get started, clone the repository and navigate to the project directory:
+
+1. Clone the Repository
 ```
 git clone https://github.com/jianlin-cheng/FunBind.git
 cd FunBind
 ```
 
-Then, create the environment and activate it by running:
+2. Download checkpoints (~ GB total):
+```
+wget url-for-data
+unzip downloaded-data
+```
+
+3. Set Up the Conda Environment:
 ```bash
 conda env create -f FunBind.yml
 conda activate FunBind
@@ -44,6 +52,31 @@ conda activate FunBind
 ## Dataset 
 
 <details>
+
+Sample Sequence Data:
+```
+
+```
+
+Sample Structure Data:
+```
+
+```
+
+Sample Text Data:
+```
+
+```
+
+Sample Interpro Data:
+```
+
+```
+
+Sample Ontology Data:
+```
+
+```
 
 </details>
 
@@ -56,68 +89,24 @@ conda activate FunBind
 
 Feature Extraction and Comparison Across Multiple Modalities (e.g., Sequence, Structure, Text, and Domain Annotations)
 
+```bash
+
+ python zeroshot_inference.py --model_checkpoint /path/to/funbind_checkpoint.pth --input-path examples/interpro.txt  --modality Interpro --ontology-path examples/ontology.txt --go-graph examples/go-basic.obo --device cuda:1
+```
+
+
+```bash
+python zeroshot_inference.py --model_checkpoint /path/to/funbind_checkpoint --input-path examples/interpro.txt --folder [intermediate_folder]
+```
+
+```bash 
+python zeroshot_inference.py --model-checkpoint /path/to/funbind_checkpoint.pth \ --input-path examples/interpro.txt \ --modality Interpro \ --ontology-path examples/ontology.txt \ --go-graph examples/go-basic.obo \ --device cuda:1 
+```
 
 
 ```python
 
-from FunBind import data
-import torch
-from FunBind.models import funbind_model
-from FunBind.models.funbind_model import ModalityType
 
-# Example data for protein sequences, structures, text, and annotations
-sequence_list = ["ATGCAGT", "GTCAGTAC", "CGTATCG"]
-structure_paths = [".assets/structure1.pdb", ".assets/structure2.pdb", ".assets/structure3.pdb"]
-text_paths = [".assets/text1.txt", ".assets/text2.txt", ".assets/text3.txt"]
-annotations_paths = [".assets/annotations1.json", ".assets/annotations2.json", ".assets/annotations3.json"]
-
-device = "cuda:0" if torch.cuda.is_available() else "cpu"
-
-# Instantiate model
-model = funbind_model.FunBind(pretrained=True)
-model.eval()
-model.to(device)
-
-# Load data
-inputs = {
-    ModalityType.SEQUENCE: data.load_and_transform_sequence(sequence_list, device),
-    ModalityType.STRUCTURE: data.load_and_transform_structure(structure_paths, device),
-    ModalityType.TEXT: data.load_and_transform_text(text_paths, device),
-    ModalityType.ANNOTATION: data.load_and_transform_annotations(annotations_paths, device),
-}
-
-with torch.no_grad():
-    embeddings = model(inputs)
-
-print(
-    "Sequence x Structure: ",
-    torch.softmax(embeddings[ModalityType.SEQUENCE] @ embeddings[ModalityType.STRUCTURE].T, dim=-1),
-)
-print(
-    "Sequence x Text: ",
-    torch.softmax(embeddings[ModalityType.SEQUENCE] @ embeddings[ModalityType.TEXT].T, dim=-1),
-)
-print(
-    "Structure x Annotations: ",
-    torch.softmax(embeddings[ModalityType.STRUCTURE] @ embeddings[ModalityType.ANNOTATION].T, dim=-1),
-)
-
-# Expected output:
-#
-# Sequence x Structure:
-# tensor([[0.9876, 0.0012, 0.0112],
-#         [0.0041, 0.9987, 0.0216],
-#         [0.0105, 0.0167, 0.9934]])
-#
-# Sequence x Text:
-# tensor([[0.9998, 0.0001, 0.0002],
-#         [0.0003, 0.9996, 0.0007],
-#         [0.0002, 0.0005, 0.9993]])
-#
-# Structure x Annotations:
-# tensor([[0.9625, 0.0314, 0.0061],
-#         [0.0457, 0.9342, 0.0201],
-#         [0.0213, 0.0246, 0.9541]])
 
 ```
 
@@ -133,11 +122,16 @@ python train.py --epochs [Number_epoch] --folder [intermediate_folder]
 ## Training
 <details>
 
+### Self-supervised Pretraining
+
+### Supervised Function Classification via Fine-Tuning
+
 </details>
 
 ## Developer
 
-<details></details>
+<details>
+
 ```
 Frimpong Boadu
 Deparment of Computer Science
@@ -145,10 +139,12 @@ University of Missouri
 Columbia, MO 65211, USA
 Email: fbqc9@missouri.edu
 ```
+</details>
 
 
 ## Contact
 <details>
+
 ```
 Jianlin (Jack) Cheng, PhD, AAAS Fellow
 Curators' Distinguished Professor
@@ -158,6 +154,7 @@ University of Missouri
 Columbia, MO 65211, USA
 Email: chengji@missouri.edu
 ```
+
 </details>
 
 ## License
