@@ -176,7 +176,7 @@ if __name__ == '__main__':
     parser.add_argument('--model_checkpoint', type=str, required=True, help="Path to the pretrained model checkpoint.")
     parser.add_argument('--batch', type=int, help="BatchSize", default=3)
     parser.add_argument('--topk', type=int, help="Top K", default=1)
-    parser.add_argument('--device', type=str, default='cuda', help="Device to run inference on (cuda or cpu).")
+    parser.add_argument('--device', type=str, default='cpu', help="Device to run inference on (cuda or cpu).")
 
     args = parser.parse_args()
 
