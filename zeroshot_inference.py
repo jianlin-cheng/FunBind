@@ -9,6 +9,14 @@ import re
 import torch.nn.functional as F
 
 
+
+# TODO: 
+# 1. Add validation to ensure topk <= len(terms)
+# 2. Add validation to ensure the input data is in the correct format
+# 3. Add inference with other base models
+
+
+
 def load_model(device):
     config = load_config('config.yaml')['config1']
     model = SeqBindPretrain(config=config).to(device)
@@ -114,7 +122,6 @@ def get_embeddings(model, data, modality, device):
     return outputs
 
 
-
 def generate_embeddings(data, modality="Sequence"):
     embeddings = {}
 
@@ -166,17 +173,13 @@ if __name__ == '__main__':
     parser.add_argument('--modality', type=str, required=True, choices=['Sequence', 'Structure', 'Text', 'Interpro'], help="Input modality type")
     parser.add_argument('--ontology-path', type=str, required=True, help="Path to list of ontology terms")
     parser.add_argument('--go-graph', type=str, required=True, help="Path to ontology file(OBO)")
-    parser.add_argument('--batch', type=int, help="BatchSize", default=1)
-    # parser.add_argument('--output_dir', type=str, required=True, help="Directory to save outputs")
-
     parser.add_argument('--model_checkpoint', type=str, required=True, help="Path to the pretrained model checkpoint.")
+    parser.add_argument('--batch', type=int, help="BatchSize", default=3)
+    parser.add_argument('--topk', type=int, help="Top K", default=1)
     parser.add_argument('--device', type=str, default='cuda', help="Device to run inference on (cuda or cpu).")
 
     args = parser.parse_args()
 
-
-    #if not (args.sequence or args.structure or args.text or args.interpro):
-     #   parser.error("At least one input modality (--sequence, --structure, --text, --interpro) must be provided.")
 
     if args.modality == 'Sequence':
         data = combine_modalities(sequence_data=args.input_path, use_sequence=False)
@@ -205,4 +208,6 @@ if __name__ == '__main__':
                                       modality_embeddings=modality_embeddings, 
                                       ontology_embeddings=ontology_embeddings,
                                       terms=terms,
-                                      term_names=terms)
+                                      term_names=terms, topk=args.topk)
+    
+    
