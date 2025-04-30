@@ -6,7 +6,7 @@
 `FunBind` is a multimodal model for protein function prediction, combining protein sequences, structures, textual descriptions, domain annotations, and ontology information.
 It supports both direct `classification` and `zero-shot` prediction of novel functional terms through cross-modal contrastive learning.
 
-![Method overview ](model.png)
+![Method overview ](models/model.png)
 
 
 ## Contents
