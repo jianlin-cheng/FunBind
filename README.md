@@ -65,7 +65,7 @@ Sample Structure Data:
 
 Sample Text Data:
 ```
-
+The text data can be provided in the [UniProt Flat Text format](https://www.uniprot.org/help/uniprotkb_format). You can download data in this format using the [UniProt ID Mapping tool](https://www.uniprot.org/id-mapping). For an example of the expected format, please refer to the file located at [`examples/text.txt`](examples/text.txt).
 ```
 
 Sample Interpro Data:
@@ -87,16 +87,29 @@ Sample Ontology Data:
 
 ### Zero-shot Inference
 
-Feature Extraction and Comparison Across Multiple Modalities (e.g., Sequence, Structure, Text, and Domain Annotations)
-
 ```bash
- python zeroshot_inference.py --model_checkpoint /path/to/funbind_checkpoint.pth --input-path input-file  --modality ... --ontology-path examples/ontology.txt --go-graph examples/go-basic.obo --device cuda:1
+    python zeroshot_inference.py [-h] \
+        --input-path INPUT_PATH \
+        --modality {Sequence,Structure,Text,Interpro} \
+        --ontology-path ONTOLOGY_PATH \
+        --go-graph GO_GRAPH \
+        --model-checkpoint MODEL_CHECKPOINT \
+        [--batch BATCH] \
+        [--topk TOPK] \
+        [--device DEVICE]
 ```
 
-Example, if you want to use Text to perform zero-shot on the sample data provided in examples, run 
+####  Example:
+
+To run zero-shot inference using Text modality on the sample data in the examples/ directory:
 
 ```bash
-python zeroshot_inference.py --model_checkpoint /path/to/funbind_checkpoint.pth --input-path examples/text.txt  --modality Text --ontology-path examples/ontology.txt --go-graph examples/go-basic.obo --device cuda:1
+python zeroshot_inference.py \
+    --model-checkpoint /path/to/funbind_checkpoint.pth \
+    --input-path examples/text.txt \
+    --modality Text \
+    --ontology-path examples/ontology.txt \
+    --go-graph examples/go-basic.obo
 ```
 
 
@@ -123,7 +136,6 @@ Top 1 term: ('GO:0170038',), Score: 95.72%
 Top 2 term: ('GO:0170035',), Score: 3.15%
 Top 3 term: ('GO:0170039',), Score: 1.13%
 -----------------------------
-
 ```
 
 
