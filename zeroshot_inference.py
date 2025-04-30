@@ -2,12 +2,13 @@ import argparse
 import torch
 from transformers import EsmTokenizer, T5Tokenizer, AutoTokenizer
 from transformers import EsmModel, T5EncoderModel, AutoModel
+import re
+import torch.nn.functional as F
+from models.Metrics import Retrieve_MRR, Retrive_at_k
 from data_processing.extract_data import combine_modalities
 from models.model import SeqBindPretrain
 from utils import load_ckp, load_config, load_graph
-import re
-import torch.nn.functional as F
-
+from Const import BASE_DATA_DIR
 
 
 # TODO: 
