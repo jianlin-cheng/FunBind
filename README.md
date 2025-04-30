@@ -65,7 +65,12 @@ Sample Structure Data:
 
 Sample Text Data:
 ```
-The text data can be provided in the [UniProt Flat Text format](https://www.uniprot.org/help/uniprotkb_format). You can download data in this format using the [UniProt ID Mapping tool](https://www.uniprot.org/id-mapping). For an example of the expected format, please refer to the file located at [`examples/text.txt`](examples/text.txt).
+The text data can be provided in the [UniProt Flat Text format]
+(https://www.uniprot.org/help/uniprotkb_format). You can 
+download data in this format using the [UniProt ID Mapping 
+tool](https://www.uniprot.org/id-mapping). For an example of
+ the expected format, please refer to the file located at
+  [`examples/text.txt`](examples/text.txt).
 ```
 
 Sample Interpro Data:
