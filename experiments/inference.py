@@ -1,20 +1,31 @@
 import os
 import re
+import sys
 import torch
-from Metrics import PreRecF
-from data_processing.extract_data import combine_modalities
-from data_processing.utils import load_pickle, save_pickle
-from models.model import SeqBindClassifier
-from utils import load_ckp, load_config, load_graph
 from transformers import EsmTokenizer, T5Tokenizer, AutoTokenizer
 from transformers import EsmModel, T5EncoderModel, AutoModel, AutoTokenizer
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 import torch.nn.functional as F
-from data_processing.dataset import CustomDataset, CustomDataCollator
 from torch.utils.data import Dataset, DataLoader
+
+
+# BASE_PATH
+sys.path.append(os.path.abspath('/home/fbqc9/Workspace/MCLLM/'))
+
+from data_processing.utils import load_pickle
+from utils import load_ckp, load_config, load_graph
+from data_processing.extract_data import combine_modalities
+from data_processing.utils import load_pickle
+from models.model import SeqBindClassifier
+from utils import load_ckp, load_config, load_graph
+from data_processing.dataset import CustomDataCollator
+
 import networkx as nx
+
+from Const import BASE_DATA_DIR
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 device = "cuda:1"
@@ -56,7 +67,7 @@ class InferenceDataset(Dataset):
     def __init__(self, modality,  data_path=None, data_list=None):
 
         self.modality = modality
-        self.base_path = data_path or '/home/fbqc9/Workspace/MCLLM_DATA/DATA/test'
+        self.base_path = data_path or BASE_DATA_DIR +'/test'
         self.data_list = data_list
 
         
@@ -161,11 +172,11 @@ def get_modality_list(data):
     return modality_list
 
 
-def load_model(ontology, model_name, device):
+def load_model(ontology, device):
     config = load_config('config.yaml')['config1']
     model = SeqBindClassifier(config=config, go_ontology=ontology).to(device)
-    ckp_dir = '/home/fbqc9/Workspace/MCLLM_DATA/DATA/saved_models/'
-    ckp_file = ckp_dir + f"{ontology}_{model_name}.pt"
+    ckp_dir = BASE_DATA_DIR + '/saved_models/'
+    ckp_file = ckp_dir + f"{ontology}.pt"
     print("Loading model checkpoint @ {}".format(ckp_file))
     loaded_model = load_ckp(filename=ckp_file, model=model, model_only=True, strict=True)
     return loaded_model
@@ -207,10 +218,9 @@ def main():
     
 
     ontology = "BP"
-    model_name = "unfrozen"
     num_batches = 120
     encoder =  {'Sequence': 'esm2_t48', 'Structure': 'prost5', 'Interpro': 'llama2', 'Text': 'llama2'}
-    data_path = "/home/fbqc9/Workspace/MCLLM_DATA/DATA/test/dataset_new"  
+    data_path = BASE_DATA_DIR + "/test/dataset"  
     modalities_pred = ["Sequence", "Structure", "Text", "Interpro"]
 
 
@@ -239,15 +249,15 @@ def main():
         }
 
 
-    go_terms_list = load_pickle(f"/home/fbqc9/Workspace/MCLLM_DATA/DATA/data/labels/{ontology}_terms")
+    go_terms_list = load_pickle(f"{BASE_DATA_DIR}/data/labels/{ontology}_terms")
 
 
-    sequence_fasta = "/home/fbqc9/Workspace/MCLLM_DATA/DATA/test/raw/sequence.fasta"
-    structure_fasta = "/home/fbqc9/Workspace/MCLLM_DATA/DATA/test/raw/structure.fasta"
-    text_data = "/home/fbqc9/Workspace/MCLLM_DATA/DATA/test/raw/text.txt"
-    interpro_data = "/home/fbqc9/Workspace/MCLLM_DATA/DATA/test/raw/interpro2.txt"
+    sequence_fasta = BASE_DATA_DIR + "/test/raw/sequence.fasta"
+    structure_fasta = BASE_DATA_DIR + "/test/raw/structure.fasta"
+    text_data = BASE_DATA_DIR + "/test/raw/text.txt"
+    interpro_data = BASE_DATA_DIR + "/test/raw/interpro2.txt"
 
-    go_graph = load_graph(graph_pth="/home/fbqc9/Workspace/MCLLM/evaluation/go-basic.obo")
+    go_graph = load_graph(graph_pth= BASE_DATA_DIR + "/evaluation/go-basic.obo")
     go_set = nx.ancestors(go_graph, FUNC_DICT[ontology])
 
     data = combine_modalities(sequence_data=sequence_fasta, 
@@ -257,13 +267,13 @@ def main():
 
 
     modality_list = get_modality_list(data)
-    test_proteins = load_pickle("/home/fbqc9/Workspace/MCLLM/evaluation/proteins")[ontology].difference(set(['P0DXI8', 'P0DXI6']))
+    test_proteins = load_pickle(BASE_DATA_DIR + "/evaluation/proteins")[ontology].difference(set(['P0DXI8', 'P0DXI6']))
 
 
     print(len(list(modality_list['Interpro'].intersection(test_proteins))))
 
 
-    generated = os.listdir("/home/fbqc9/Workspace/MCLLM_DATA/DATA/test/dataset_new")
+    generated = os.listdir(BASE_DATA_DIR + "/test/dataset")
     generated = set([i.split(".")[0] for i in generated])
 
     protein_list = list(set(data.keys()) - generated)
@@ -311,7 +321,7 @@ def main():
 
 
     # load model and predict
-    model = load_model(ontology=ontology, model_name=model_name, device=device)
+    model = load_model(ontology=ontology, device=device)
     model.eval()
 
 
@@ -379,7 +389,7 @@ def main():
     predictions_dict['Consensus_w_structure'] = Consensus_w_structure
     
     for mod, protein_predictions in predictions_dict.items():
-        with open(f"/home/fbqc9/Workspace/MCLLM/evaluation/predictions/{ontology}/{mod}_{model_name}.tsv", "w") as f:
+        with open(f"{BASE_DATA_DIR}/evaluation/preds/{ontology}/{mod}.tsv", "w") as f:
             for protein, go_term_scores in protein_predictions.items():
                 for go_term, score in go_term_scores.items():
                     if score >= 0.01:

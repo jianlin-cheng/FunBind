@@ -2,16 +2,14 @@ import os
 import pickle
 import shutil
 import subprocess
-from matplotlib import pyplot as plt, rcParams
-import numpy as np
-from collections import Counter
-import math
-import obonet
+import sys
 import networkx as nx
 from Bio import SeqIO
 
-from utils import load_pickle
+# BASE_PATH
+sys.path.append(os.path.abspath('/home/fbqc9/Workspace/MCLLM/'))
 
+from Const import BASE_DATA_DIR
 
 
 def pickle_save(data, filename):
@@ -63,7 +61,7 @@ def get_seq_less(train_fasta, test_fasta, seq_id=0.3):
     print("Number of sequences in test fasta: {}".format(count_fasta_sequences(test_fasta)))
 
     # make temporary directory
-    wkdir = "/home/fbqc9/Workspace/MCLLM/evaluation/seq_ID/{}".format(seq_id)
+    wkdir = BASE_DATA_DIR + "/evaluation/seq_ID/{}".format(seq_id)
     create_directory(wkdir)
 
 
@@ -152,17 +150,17 @@ def read_filter_write_gt(proteins, in_file, out_file):
 
 def main():
 
-    train_fasta = "/home/fbqc9/Workspace/MCLLM_DATA/DATA/cafa5/Train/train_sequences.fasta"
-    test_fasta = "/home/fbqc9/Workspace/MCLLM/evaluation/sequence2.fasta"
+    train_fasta = BASE_DATA_DIR + "/cafa5/Train/train_sequences.fasta"
+    test_fasta = BASE_DATA_DIR + "/test/raw/sequence2.fasta"
 
     methods = ['naive', 'diamondblast', 'deepgose', 'sprof', 'transfew', 'Sequence', 'Structure', 'Text', 'Interpro', 'Consensus_w_structure', 'Consensus_wo_structure']
     ontologies = ['CC', 'MF', 'BP']
 
-    in_file_pths = "/home/fbqc9/Workspace/MCLLM/evaluation/predictions/{}/{}.tsv"
-    out_file_pths = "/home/fbqc9/Workspace/MCLLM/evaluation/predictions_0.3/{}/{}.tsv"
+    in_file_pths = BASE_DATA_DIR + "/evaluation/predictions/{}/{}.tsv"
+    out_file_pths = BASE_DATA_DIR + "/evaluation/predictions_0.3/{}/{}.tsv"
 
-    gt_in_file_pths = "/home/fbqc9/Workspace/MCLLM/evaluation/groundtruth/{}.tsv"
-    gt_out_file_pths = "/home/fbqc9/Workspace/MCLLM/evaluation/groundtruth/{}_{}.tsv"
+    gt_in_file_pths = BASE_DATA_DIR + "/evaluation/groundtruth/{}.tsv"
+    gt_out_file_pths = BASE_DATA_DIR + "/evaluation/groundtruth/{}_{}.tsv"
 
     seq_id = 0.3
 
@@ -173,7 +171,7 @@ def main():
     for ont in ontologies:
         read_filter_write_gt(proteins_less_30, gt_in_file_pths.format(ont), gt_out_file_pths.format(ont, seq_id))
 
-        create_directory("/home/fbqc9/Workspace/MCLLM/evaluation/predictions_{}/{}".format(seq_id, ont))
+        create_directory(BASE_DATA_DIR + "/evaluation/predictions_{}/{}".format(seq_id, ont))
         for method in methods:
             in_file = in_file_pths.format(ont, method)
             out_file = out_file_pths.format(ont, method)
