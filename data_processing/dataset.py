@@ -1,6 +1,7 @@
 import torch
 from torch.utils.data import Dataset
 from data_processing.utils import load_pickle
+from Const import BASE_DATA_DIR
 
 
 class CustomDataset(Dataset):
@@ -8,13 +9,13 @@ class CustomDataset(Dataset):
 
         self.modality_1, self.modality_2 = modality_pair.split("_")
         self.config = config
-        self.base_path = data_path or '/home/fbqc9/Workspace/MCLLM_DATA/DATA/data'
+        self.base_path = data_path or BASE_DATA_DIR
 
         if data_list is not None:
             self.data_list = data_list
             
         else:
-            train_valid_data = load_pickle(f"{self.base_path}/train_valid")
+            train_valid_data = load_pickle(f"{self.base_path}/data/train_valid")
             
             if validation:
                 self.data_list = train_valid_data["Validation"]
@@ -30,7 +31,7 @@ class CustomDataset(Dataset):
 
     def __getitem__(self, idx):
         sample = torch.load(
-            f'{self.base_path}/dataset_new/{self.data_list[idx]}.pt',
+            f'{self.base_path}/data/dataset/{self.data_list[idx]}.pt',
             weights_only=False
         )
 

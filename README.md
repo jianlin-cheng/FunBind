@@ -55,12 +55,12 @@ conda activate FunBind
 
 Sample Sequence Data:
 ```
-
+Sequence data can be provided in the fasat format. See [`examples/sequence.fasta`](examples/text.txt).
 ```
 
 Sample Structure Data:
 ```
-
+Structure Data can be downloaded from Alphafold, and converted to 3DI sequences. see [](https://github.com/mheinzinger/ProstT5).
 ```
 
 Sample Text Data:
@@ -75,7 +75,7 @@ tool](https://www.uniprot.org/id-mapping). For an example of
 
 Sample Interpro Data:
 ```
-
+Interpro data is can be downloaded or generated with Interproscan [Interpro](https://www.ebi.ac.uk/interpro/download/)
 ```
 
 Sample Ontology Data:

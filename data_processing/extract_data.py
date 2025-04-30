@@ -19,7 +19,12 @@ import subprocess
 Scripts used in processing raw data
 '''
 def remove_publication_records(record):
-    pattern = r'\{ECO:[^}]*\}|\(PubMed:\d+\)'
+    #used this initially
+    pattern = r'\{ECO:[^}]*\}|\(PubMed:\d+\)'  
+
+    # this may be better
+    # pattern = r'\{ECO:[^}]*\}|\((?:PubMed:\d+(?:, )?)+\)'
+    
     cleaned_description = {}
     for key, value in record.items():
         cleaned_value = re.sub(pattern, '', value).strip()
@@ -103,7 +108,8 @@ def collect_textual_annotation(proteins, text_file):
 
         acc = record.accessions[0]
 
-        if acc in proteins:
+        # if acc in proteins
+        if acc in proteins or proteins == "All":
             annotations = {}
             annotations["PROTEIN NAME"] = record.entry_name
             annotations["DESCRIPTION"] = record.description.split("Full=")[1].split(";")[0]
@@ -144,7 +150,7 @@ def parse_protein2ipr(proteins, interpro_file, text_data):
 
             protein_id = parts[0]
 
-            if protein_id in proteins:
+            if protein_id in proteins or proteins == "All":
                 interpro_id = parts[1]
 
                 try:
@@ -187,7 +193,7 @@ def extract_proteins_from_fasta(file_path):
 
 
 
-def combine_modalities(sequence_data, structure_data, textual_data, interpro_data):
+def combine_modalities(sequence_data=None, structure_data=None, textual_data=None, interpro_data=None, use_sequence=True):
     """
     Combine data from multiple modalities into a unified representation.
 
@@ -196,6 +202,7 @@ def combine_modalities(sequence_data, structure_data, textual_data, interpro_dat
         structure_data (str): Path to Structural sequence file
         textual_data (): Path to textual data
         interpro_data (): Path to interpro data
+        use_sequence (bool): Flag to indicate whether to use sequence data.
 
     Returns:
         : A combined dictionary where keys are identifiers and values are unified
@@ -203,11 +210,27 @@ def combine_modalities(sequence_data, structure_data, textual_data, interpro_dat
     """
 
 
-    proteins = set(extract_proteins_from_fasta(sequence_data))
-    sequences = fasta_to_dic(sequence_data, sep="|", pos=1)
-    structures = fasta_to_dic(structure_data, sep="-", pos=1)
-    text = collect_textual_annotation(proteins, textual_data)
-    interpros = parse_protein2ipr(proteins, interpro_data, text)
+    sequences, structures, text, interpros = {}, {}, {}, {}
+
+    if use_sequence:
+        proteins = set(extract_proteins_from_fasta(sequence_data))
+    else:
+        proteins = "All"
+
+    if sequence_data:
+        sequences = fasta_to_dic(sequence_data, sep="|", pos=1)
+
+    if structure_data:
+        structures = fasta_to_dic(structure_data, sep="-", pos=1)
+
+    if textual_data:
+        text = collect_textual_annotation(proteins, textual_data)
+
+    if interpro_data:
+        interpros = parse_protein2ipr(proteins, interpro_data, text)
+
+    if not use_sequence:
+        proteins = set(sequences.keys()).union(set(structures.keys())).union(set(text.keys())).union(set(interpros.keys()))
 
 
     data = {}

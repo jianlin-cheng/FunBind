@@ -122,6 +122,11 @@ def compute_similarity(protein_list, term_list, modality1, model):
     ontology_embeddings = get_embeddings(get_model("llama2"), ontology_text, "Ontology")
 
 
+    print(ontology_embeddings)
+
+    exit()
+
+
     with torch.no_grad():
         mod1_features, _ = model.encode_modality(modality=f'{modality1}_modality', value=modality1_embeddings.squeeze(1))
         ont_features, _ = model.encode_modality(modality='Ontology_modality', value=ontology_embeddings)

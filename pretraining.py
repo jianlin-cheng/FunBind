@@ -8,11 +8,12 @@ from Metrics import Similarity
 from data_processing.dataset import CustomDataset, CustomDataCollator
 from data_processing.utils import load_pickle
 from models.model import SeqBindPretrain
-from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts, LambdaLR, SequentialLR, LinearLR, CosineAnnealingLR
+from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts, SequentialLR, LinearLR, CosineAnnealingLR
 from utils import save_ckp, load_ckp
 import yaml
 import random
 import numpy as np
+from Const import BASE_DATA_DIR
 
 
 
@@ -217,7 +218,7 @@ if __name__ == '__main__':
     else:
         args.device = "cpu"
 
-    args.device = "cuda:1"
+    args.device = "cuda:0"
 
     config = load_config('config.yaml')['config_prostt5']
 
@@ -295,7 +296,7 @@ if __name__ == '__main__':
     )
 
     
-    ckp_dir = '/home/fbqc9/Workspace/MCLLM_DATA/DATA/saved_models/'
+    ckp_dir = BASE_DATA_DIR + '/saved_models/'
     ckp_file = ckp_dir + "pretrained_ontology_prostt5_new"
     
 

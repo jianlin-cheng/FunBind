@@ -14,6 +14,7 @@ import yaml
 import random
 import numpy as np
 from num2words import num2words
+from Const import BASE_DATA_DIR
 
 
 def set_seed(seed):
@@ -123,7 +124,7 @@ def train(model, train_dataloader, val_dataloader, labels, criteria, metrics, op
     if args.wandb:
         wandb.init(
             project="FunBind",
-            name=f"{args.go_ontology}_{given_name}",
+            name=f"{args.go_ontology}",
             config={
             "learning rate": args.lr,
             "epochs": args.epochs,
@@ -204,7 +205,7 @@ if __name__ == '__main__':
 
     args.cuda = not args.no_cuda and torch.cuda.is_available()
     if args.cuda:
-        args.device = "cuda:1"
+        args.device = "cuda:0"
     else:
         args.device = "cpu"
 
@@ -224,15 +225,12 @@ if __name__ == '__main__':
         "Sequence_Interpro": load_data(modality_pair="Sequence_Interpro", config=config, batch_size=args.valid_batch, device=args.device, shuffle=False, validation=True),
     }
 
-
-    given_name = "unfrozen"
-
-    groundtruth = load_pickle("/home/fbqc9/Workspace/MCLLM_DATA/DATA/data/labels/{}_labels".format(args.go_ontology))
-    info_acc = load_pickle("/home/fbqc9/Workspace/MCLLM_DATA/DATA/data/labels/{}_ia".format(args.go_ontology))
+    groundtruth = load_pickle(BASE_DATA_DIR + "/data/labels/{}_labels".format(args.go_ontology))
+    info_acc = load_pickle(BASE_DATA_DIR + "/data/labels/{}_ia".format(args.go_ontology))
     
 
     model = SeqBindClassifier(config=config, go_ontology=args.go_ontology).to(args.device)
-    _ckp_file = '/home/fbqc9/Workspace/MCLLM_DATA/DATA/saved_models/pretrained_ontology.pt'
+    _ckp_file = BASE_DATA_DIR + '/saved_models/pretrained_ontology.pt'
     model = load_ckp(filename=_ckp_file, model=model, model_only=True, strict=False) 
     print(model)
 
@@ -278,8 +276,8 @@ if __name__ == '__main__':
     optimizer = optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay, betas=(0.9, 0.999))
     lr_scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=20, T_mult=2, eta_min=1e-6)
 
-    ckp_dir = '/home/fbqc9/Workspace/MCLLM_DATA/DATA/saved_models/'
-    ckp_file = ckp_dir + "{}_{}.pt".format(args.go_ontology, given_name)
+    ckp_dir = BASE_DATA_DIR + '/saved_models/'
+    ckp_file = ckp_dir + "{}.pt".format(args.go_ontology)
 
     if args.load_weights and os.path.exists(ckp_file):
         print("Loading model checkpoint @ {}".format(ckp_file))

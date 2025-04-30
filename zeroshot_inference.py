@@ -192,6 +192,10 @@ if __name__ == '__main__':
 
     modality_embeddings = generate_embeddings(data, args.modality)
 
+    print(modality_embeddings)
+
+    exit()
+
     # Change to include term names
     terms, term_names = load_ontology_list(args.ontology_path)
     go_graph = load_graph(args.go_graph)
