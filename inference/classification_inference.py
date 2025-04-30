@@ -1,7 +1,6 @@
 import os
 import re
 import torch
-from Metrics import PreRecF
 from data_processing.extract_data import combine_modalities
 from data_processing.utils import load_pickle, save_pickle
 from models.model import SeqBindClassifier
@@ -15,9 +14,6 @@ import torch.nn.functional as F
 from data_processing.dataset import CustomDataset, CustomDataCollator
 from torch.utils.data import Dataset, DataLoader
 import networkx as nx
-
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-device = "cuda:1"
 
 
 class CustomDataCollator:
