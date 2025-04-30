@@ -90,23 +90,39 @@ Sample Ontology Data:
 Feature Extraction and Comparison Across Multiple Modalities (e.g., Sequence, Structure, Text, and Domain Annotations)
 
 ```bash
-
- python zeroshot_inference.py --model_checkpoint /path/to/funbind_checkpoint.pth --input-path examples/interpro.txt  --modality Interpro --ontology-path examples/ontology.txt --go-graph examples/go-basic.obo --device cuda:1
+ python zeroshot_inference.py --model_checkpoint /path/to/funbind_checkpoint.pth --input-path input-file  --modality ... --ontology-path examples/ontology.txt --go-graph examples/go-basic.obo --device cuda:1
 ```
 
+Example, if you want to use Text to perform zero-shot on the sample data provided in examples, run 
 
 ```bash
-python zeroshot_inference.py --model_checkpoint /path/to/funbind_checkpoint --input-path examples/interpro.txt --folder [intermediate_folder]
-```
-
-```bash 
-python zeroshot_inference.py --model-checkpoint /path/to/funbind_checkpoint.pth \ --input-path examples/interpro.txt \ --modality Interpro \ --ontology-path examples/ontology.txt \ --go-graph examples/go-basic.obo \ --device cuda:1 
+python zeroshot_inference.py --model_checkpoint /path/to/funbind_checkpoint.pth --input-path examples/text.txt  --modality Text --ontology-path examples/ontology.txt --go-graph examples/go-basic.obo --device cuda:1
 ```
 
 
+
+This will give you the output
 ```python
-
-
+Predictions for protein: Q64565
+Top 1 term: ('GO:0170035',), Score: 85.83%
+Top 2 term: ('GO:0170033',), Score: 13.29%
+Top 3 term: ('GO:1902674',), Score: 0.34%
+-----------------------------
+Predictions for protein: A8BPK8
+Top 1 term: ('GO:1905504',), Score: 87.74%
+Top 2 term: ('GO:0097561',), Score: 5.90%
+Top 3 term: ('GO:0097560',), Score: 5.66%
+-----------------------------
+Predictions for protein: Q12198
+Top 1 term: ('GO:0170043',), Score: 63.78%
+Top 2 term: ('GO:0170033',), Score: 20.56%
+Top 3 term: ('GO:0170041',), Score: 9.86%
+-----------------------------
+Predictions for protein: P18335
+Top 1 term: ('GO:0170038',), Score: 95.72%
+Top 2 term: ('GO:0170035',), Score: 3.15%
+Top 3 term: ('GO:0170039',), Score: 1.13%
+-----------------------------
 
 ```
 
