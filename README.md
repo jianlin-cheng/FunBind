@@ -1,4 +1,4 @@
-# FunBind: A multimodal foundational AI model for improving protein function prediction
+# FunBind: A unified multimodal model for generalizable zero-shot and supervised protein function prediction
 [![View Preprint on bioRxiv](https://img.shields.io/badge/Preprint-bioRxiv-b31b1b)](https://github.com/jianlin-cheng/FunBind/blob/main/model.png)
 
 
