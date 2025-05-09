@@ -195,5 +195,5 @@ This project is covered under the MIT License
 
 ## Reference
 <details>
-FunBind: A multimodal foundational AI model for improving protein function prediction.
+Boadu, F., Wang, Y., Cheng, J. A unified multimodal model for generalizable zero-shot and supervised protein function prediction. Submitted. 
 </details>
