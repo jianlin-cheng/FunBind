@@ -35,10 +35,13 @@ git clone https://github.com/jianlin-cheng/FunBind.git
 cd FunBind
 ```
 
-2. Download checkpoints (~ GB total):
+2. Download checkpoints (~ 16GB total):
+<!-- 
+   wget url-for-data
+   downloaded-data
+-->
 ```
-wget url-for-data
-unzip downloaded-data
+https://calla.rnet.missouri.edu/rnaminer/funbinddata/DATA/saved_models/
 ```
 
 3. Set Up the Conda Environment:
@@ -156,7 +159,7 @@ python train.py --epochs [Number_epoch] --folder [intermediate_folder]
 
 <details>
 
-You can download the preprocessed training and validation data, as well as the data for experiments from (~37 GB total):
+You can download the preprocessed training and validation data, as well as the data for experiments from (~36 GB total):
 ```
 https://calla.rnet.missouri.edu/rnaminer/funbinddata
 ```
