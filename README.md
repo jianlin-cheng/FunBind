@@ -153,12 +153,13 @@ python train.py --epochs [Number_epoch] --folder [intermediate_folder]
 </details>
 
 ## Training
+
+<details>
+
 You can download the preprocessed training and validation data, as well as the data for experiments from (~37 GB total):
 ```
 https://calla.rnet.missouri.edu/rnaminer/funbinddata
 ```
-
-<details>
 
 ### Self-supervised Pretraining
 
