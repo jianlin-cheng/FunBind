@@ -174,7 +174,7 @@ if __name__ == '__main__':
     parser.add_argument('--modality', type=str, required=True, choices=['Sequence', 'Structure', 'Text', 'Interpro'], help="Input modality type")
     parser.add_argument('--ontology-path', type=str, required=True, help="Path to list of ontology terms")
     parser.add_argument('--go-graph', type=str, required=True, help="Path to ontology file(OBO)")
-    parser.add_argument('--model_checkpoint', type=str, required=True, help="Path to the pretrained model checkpoint.")
+    parser.add_argument('--model-checkpoint', type=str, required=True, help="Path to the pretrained model checkpoint.")
     parser.add_argument('--batch', type=int, help="BatchSize", default=3)
     parser.add_argument('--topk', type=int, help="Top K", default=1)
     parser.add_argument('--device', type=str, default='cpu', help="Device to run inference on (cuda or cpu).")
@@ -192,10 +192,6 @@ if __name__ == '__main__':
         data = combine_modalities(interpro_data=args.input_path, use_sequence=False)
 
     modality_embeddings = generate_embeddings(data, args.modality)
-
-    print(modality_embeddings)
-
-    exit()
 
     # Change to include term names
     terms, term_names = load_ontology_list(args.ontology_path)
