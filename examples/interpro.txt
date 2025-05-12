@@ -1,0 +1,41 @@
+A8BPK8	IPR000719	Protein kinase domain	PF00069	23	195
+A8BPK8	IPR000719	Protein kinase domain	PF00069	226	309
+A8BPK8	IPR000719	Protein kinase domain	PS50011	22	309
+A8BPK8	IPR000719	Protein kinase domain	SM00220	22	309
+A8BPK8	IPR000959	POLO box domain	PF00659	444	479
+A8BPK8	IPR000959	POLO box domain	PS50078	435	516
+A8BPK8	IPR000959	POLO box domain	PS50078	563	644
+A8BPK8	IPR008271	Serine/threonine-protein kinase, active site	PS00108	141	153
+A8BPK8	IPR011009	Protein kinase-like domain superfamily	SSF56112	22	345
+A8BPK8	IPR017441	Protein kinase, ATP binding site	PS00107	28	51
+A8BPK8	IPR033695	Second polo-box domain	cd13117	563	640
+A8BPK8	IPR033701	First polo-box domain	cd13118	432	517
+A8BPK8	IPR036947	POLO box domain superfamily	G3DSA:3.30.1120.30	422	637
+A8BPK8	IPR036947	POLO box domain superfamily	G3DSA:3.30.1120.30	437	559
+P18335	IPR004636	Acetylornithine/Succinylornithine transaminase family	MF_01107	16	403
+P18335	IPR004636	Acetylornithine/Succinylornithine transaminase family	TIGR00707	17	400
+P18335	IPR005814	Aminotransferase class-III	PF00202	26	400
+P18335	IPR005814	Aminotransferase class-III	PIRSF000521	28	129
+P18335	IPR005814	Aminotransferase class-III	PIRSF000521	124	157
+P18335	IPR005814	Aminotransferase class-III	PIRSF000521	174	403
+P18335	IPR005814	Aminotransferase class-III	cd00610	21	400
+P18335	IPR015421	Pyridoxal phosphate-dependent transferase, major domain	G3DSA:3.40.640.10	60	305
+P18335	IPR015422	Pyridoxal phosphate-dependent transferase, small domain	G3DSA:3.90.1150.10	30	393
+P18335	IPR015424	Pyridoxal phosphate-dependent transferase	SSF53383	20	401
+P18335	IPR017652	Acetyl/Succinylornithine transaminase family, bacteria	TIGR03246	8	404
+P18335	IPR049704	Aminotransferases class-III pyridoxal-phosphate attachment site	PS00600	223	260
+P18335	IPR050103	Class-III Pyridoxal-phosphate-dependent Aminotransferase	PTHR11986	11	400
+Q12198	IPR000277	Cys/Met metabolism, pyridoxal phosphate-dependent enzyme	PF01053	303	564
+Q12198	IPR015421	Pyridoxal phosphate-dependent transferase, major domain	G3DSA:3.40.640.10	182	421
+Q12198	IPR015422	Pyridoxal phosphate-dependent transferase, small domain	G3DSA:3.90.1150.10	432	574
+Q12198	IPR015424	Pyridoxal phosphate-dependent transferase	SSF53383	207	565
+Q12198	IPR051750	Trans-sulfuration enzymes	PTHR42699	3	569
+Q64565	IPR005814	Aminotransferase class-III	PF00202	84	503
+Q64565	IPR005814	Aminotransferase class-III	PIRSF000521	66	186
+Q64565	IPR005814	Aminotransferase class-III	PIRSF000521	176	220
+Q64565	IPR005814	Aminotransferase class-III	PIRSF000521	250	506
+Q64565	IPR005814	Aminotransferase class-III	cd00610	65	503
+Q64565	IPR015421	Pyridoxal phosphate-dependent transferase, major domain	G3DSA:3.40.640.10	118	399
+Q64565	IPR015422	Pyridoxal phosphate-dependent transferase, small domain	G3DSA:3.90.1150.10	83	503
+Q64565	IPR015424	Pyridoxal phosphate-dependent transferase	SSF53383	70	504
+Q64565	IPR049704	Aminotransferases class-III pyridoxal-phosphate attachment site	PS00600	315	353
