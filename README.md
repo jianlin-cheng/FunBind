@@ -153,12 +153,34 @@ python train.py --epochs [Number_epoch] --folder [intermediate_folder]
 </details>
 
 ## Training
+You can download the preprocessed training and validation data, as well as the data for experiments from (~37 GB total):
+```
+https://calla.rnet.missouri.edu/rnaminer/funbinddata
+```
+
 <details>
 
 ### Self-supervised Pretraining
 
-### Supervised Function Classification via Fine-Tuning
-cafaeval /home/fbqc9/Workspace/MCLLM_DATA/DATA/evaluation/go-basic.obo /home/fbqc9/Workspace/MCLLM_DATA/DATA/evaluation/predictions/MF /home/fbqc9/Workspace/MCLLM_DATA/DATA/evaluation/groundtruth/MF.tsv  -out_dir /home/fbqc9/Workspace/MCLLM_DATA/DATA/evaluation/results/MF -ia /home/fbqc9/Workspace/MCLLM_DATA/DATA/evaluation/IA.txt -prop fill -norm cafa -th_step 0.001 -max_terms 500
+1. To Train the model use the script:
+```bash
+python pretraining.py
+```
+
+### Supervised Function Classification via Fine-
+
+1. To Train the model use the script:
+```bash
+python training.py
+```
+
+
+2. Evaluation command used: see 
+see [cafa evaluator](https://github.com/BioComputingUP/CAFA-evaluator)
+```bash
+cafaeval obo-file-path predictions-path groundtruth-file -out_dir output-path -ia information-acretion-file -prop fill -norm cafa -th_step 0.001 -max_terms 500
+```
+
 
 </details>
 
