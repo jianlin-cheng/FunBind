@@ -24,10 +24,9 @@ It supports both direct `classification` and `zero-shot` prediction of novel fun
 
 
 
-## Installation
-#### To get started with FunBind, follow these steps:
-
+## &#9881; Installation Instructions
 <details>
+<summary>To get started with FunBind, follow these steps</summary>
 
 1. Clone the Repository
 ```
@@ -52,43 +51,53 @@ conda activate FunBind
 </details>
 
 
-## Dataset 
+## &#128218; Dataset Format
 
 <details>
+<summary>Click to expand dataset format details</summary>
 
-Sample Sequence Data:
-```
-Sequence data can be provided in the fasat format. See [`examples/sequence.fasta`](examples/text.txt).
-```
+---
 
-Sample Structure Data:
-```
-Structure Data can be downloaded from Alphafold, and converted to 3DI sequences. see [](https://github.com/mheinzinger/ProstT5).
-```
+### &#129516; Sequence Data  
+Sequences should be provided in **FASTA** format.  
+**Example:** [`examples/sequence.fasta`](examples/sequence.fasta)
 
-Sample Text Data:
-```
-The text data can be provided in the [UniProt Flat Text format]
-(https://www.uniprot.org/help/uniprotkb_format). You can 
-download data in this format using the [UniProt ID Mapping 
-tool](https://www.uniprot.org/id-mapping). For an example of
- the expected format, please refer to the file located at
-  [`examples/text.txt`](examples/text.txt).
-```
+---
 
-Sample Interpro Data:
-```
-Interpro data is can be downloaded or generated with Interproscan [Interpro](https://www.ebi.ac.uk/interpro/download/)
-```
+### &#129521; Structure Data  
+Structure data can be obtained from **AlphaFold** and converted into **3Di sequences** using  
+[**ProstT5 – How to derive 3Di sequences from structures**](https://github.com/mheinzinger/ProstT5?tab=readme-ov-file#-how-to-derive-3di-sequences-from-structures).  
+The resulting **3Di FASTA** file can then be used as input to **FunBind**.  
+**Example:** [`examples/structure.fasta`](examples/structure.fasta)
 
-Sample Ontology Data:
-```
+---
 
-```
+### &#128221; Text Data  
+Text descriptions should follow the **[UniProt Flat Text format](http://web.expasy.org/docs/userman.html)**.  
+You can download data using the [**UniProt ID Mapping Tool**](https://www.uniprot.org/id-mapping).  
+**Example:** [`examples/text.txt`](examples/text.txt)
+
+---
+
+### &#129513; InterPro Data  
+InterPro domain annotations can be generated using **[InterProScan](https://www.ebi.ac.uk/interpro/download/)**.  
+**Example:** [`examples/text.txt`](examples/text.txt)
+
+---
+
+### &#129504; Ontology Data  
+Ontology annotations (e.g., Gene Ontology terms) should be provided in a simple text format, where each line contains a **GO ID**.
+**Example:** [`examples/text.txt`](examples/ontology.txt)
+
+---
 
 </details>
 
-## Inference
+
+
+
+
+## &#128640; Inference
 <details>
 
 
@@ -155,7 +164,7 @@ python train.py --epochs [Number_epoch] --folder [intermediate_folder]
 
 </details>
 
-## Training
+## &#128293; Training
 
 <details>
 
@@ -188,7 +197,7 @@ cafaeval obo-file-path predictions-path groundtruth-file -out_dir output-path -i
 
 </details>
 
-## Developer
+## &#128187; Developer
 
 <details>
 
@@ -202,7 +211,7 @@ Email: fbqc9@missouri.edu
 </details>
 
 
-## Contact
+## &#128386; Contact
 <details>
 
 ```
@@ -217,10 +226,10 @@ Email: chengji@missouri.edu
 
 </details>
 
-## License
+## &#128274; License
 This project is covered under the MIT License
 
-## Reference
+## &#128214; Reference
 <details>
 Boadu, F., Wang, Y., Cheng, J. A unified multimodal model for generalizable zero-shot and supervised protein function prediction. Submitted. 
 </details>
