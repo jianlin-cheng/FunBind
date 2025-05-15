@@ -14,28 +14,29 @@ It supports both direct `classification` and `zero-shot` prediction of novel fun
 <summary>Table of contents</summary>
 
 
-- [Installation Instructions](#installation-instructions)
-- [Dataset Format](#&#128218;-dataset-format)
-    - [Sequence Data](#&#129516;-sequence-data)
-    - [Structure Data](#&#129521;-structure-data)
-    - [Text Data](#&#128221;-text-data)
-    - [InterPro Data](#&#129513;-interpro-data)
-    - [Ontology Data](#&#129504;-ontology-data)
-- [Inference](#&#128640-inference)
+- [&#9881;&#65039; Installation Instructions](#installation-instructions)
+- [&#128218; Dataset Format](#dataset-format)
+    - [&#129516; Sequence Data](#sequence-data)
+    - [Structure Data](#structure-data)
+    - [Text Data](#text-data)
+    - [InterPro Data](#interpro-data)
+    - [Ontology Data](#ontology-data)
+- [&#128640; Inference](#inference)
     - [Zero-shot Inference](#zero-shot-inference)
-    - [Classification](#supervised-classification)
-- [Training](#&#128293;-training)
+    - [Classification Inference](#classification-inference) 
+- [&#128293; Training](#training)
     - [Self-supervised Pretraining](#self-supervised-pretraining)
-    - [Supervised Function Classification via Fine-Tuning](#supervised-function-classification-via-fine-tuning)
+    - [Supervised Function Classification via Fine-Tuning](#supervised-classification)
     - [Reproducing Experiments](#experiments-conducted)
-- [Contributors](#&#128187;-contributors)
-- [Contact](#&#128386;-contact)
-- [License](#&#128274;-license)
-- [Citing this work](#&#128214;-citing-this-work)
+- [&#128187; Contributors](#contributors)
+- [&#128386; Contact](#contact)
+- [&#128274; License](#license)
+- [&#128214; Citing this work](#citation)
 
 </details>
 
-<h2 id="installation-instructions">⚙️ Installation Instructions</h2>
+<h2 id="installation-instructions"> &#9881;&#65039; Installation Instructions</h2>
+
 <details>
 <summary>To get started with FunBind, follow these steps</summary>
 
@@ -62,20 +63,23 @@ conda activate FunBind
 </details>
 
 
-## &#128218; Dataset Format
+<h2 id="dataset-format"> &#128218; Dataset Format</h2>
 
 <details>
 <summary>Click to expand dataset format details</summary>
 
 ---
 
-### &#129516; Sequence Data  
+
+<h3 id="sequence-data"> &#129516; Sequence Data</h3>
+
 Sequences should be provided in **FASTA** format.  
 **Example:** [`examples/sequence.fasta`](examples/sequence.fasta)
 
 ---
 
-### &#129521; Structure Data  
+<h3 id="structure-data"> &#129521; Structure Data</h3>
+
 Structure data can be obtained from **AlphaFold** and converted into **3Di sequences** using  
 [**ProstT5 – How to derive 3Di sequences from structures**](https://github.com/mheinzinger/ProstT5?tab=readme-ov-file#-how-to-derive-3di-sequences-from-structures).  
 The resulting **3Di FASTA** file can then be used as input to **FunBind**.  
@@ -83,20 +87,24 @@ The resulting **3Di FASTA** file can then be used as input to **FunBind**.
 
 ---
 
-### &#128221; Text Data  
+<h3 id="text-data"> &#128221; Text Data</h3>
+
 Text descriptions should follow the **[UniProt Flat Text format](http://web.expasy.org/docs/userman.html)**.  
 You can download data using the [**UniProt ID Mapping Tool**](https://www.uniprot.org/id-mapping).  
 **Example:** [`examples/text.txt`](examples/text.txt)
 
 ---
 
-### &#129513; InterPro Data  
+<h3 id="interpro-data"> &#129513; InterPro Data</h3>
+
 InterPro domain annotations can be generated using **[InterProScan](https://www.ebi.ac.uk/interpro/download/)**.  
 **Example:** [`examples/text.txt`](examples/text.txt)
 
 ---
 
-### &#129504; Ontology Data  
+<h3 id="ontology-data"> &#129504; Ontology Data</h3>
+
+ 
 Ontology annotations (e.g., Gene Ontology terms) should be provided in a simple text format, where each line contains a **GO ID**.
 **Example:** [`examples/text.txt`](examples/ontology.txt)
 
@@ -105,12 +113,12 @@ Ontology annotations (e.g., Gene Ontology terms) should be provided in a simple 
 </details>
 
 
-## &#128640; Inference
+<h2 id="inference"> &#128640; Inference</h2>
 <details>
 <summary>Run inference with pre-trained models.</summary>
 
 
-### Zero-shot Inference
+<h3 id="zero-shot-inference"> Zero-shot Inference</h3>
 
 ```bash
     python zeroshot_inference.py [-h] \
@@ -162,7 +170,9 @@ Top 3 term: ('GO:0170039',), Score: 1.13%
 ```
 
 
-### Supervised Classification
+
+<h3 id="classification-inference"> Classification Inference</h3>
+
 
 ```bash
 python train.py --epochs [Number_epoch] --folder [intermediate_folder]
@@ -170,7 +180,8 @@ python train.py --epochs [Number_epoch] --folder [intermediate_folder]
 
 </details>
 
-## &#128293; Training
+
+<h2 id="training"> &#128293; Training</h2>
 
 <details>
 <summary>Instructions for training the model.</summary>
@@ -180,14 +191,14 @@ You can download the preprocessed training and validation data, as well as the d
 https://calla.rnet.missouri.edu/rnaminer/funbinddata
 ```
 
-### Self-supervised Pretraining
+<h3 id="self-supervised-pretraining"> Self-supervised Pretraining</h3>
 
 1. To Train the model use the script:
 ```bash
 python pretraining.py
 ```
 
-### Supervised Function Classification via Fine-
+<h3 id="supervised-classification"> Supervised Classification via Fine-tuning</h3>
 
 1. To Train the model use the script:
 ```bash
@@ -205,8 +216,7 @@ cafaeval obo-file-path predictions-path groundtruth-file -out_dir output-path -i
 </details>
 
 
-
-## &#128187; Contributors
+<h2 id="contributors"> &#128187; Contributors </h2>
 <details>
 <summary>Click to expand</summary>
 
@@ -234,7 +244,7 @@ cafaeval obo-file-path predictions-path groundtruth-file -out_dir output-path -i
 </details>
 
 
-## &#128386; Contact
+<h2 id="contact"> &#128386; Contact</h2>
 <details>
 <summary>Reach us for support or inquiries.</summary>
 
@@ -252,10 +262,12 @@ Email: chengji@missouri.edu
 
 </details>
 
-## &#128274; License
+
+<h2 id="license"> &#128274; License </h2>
 This project is covered under the MIT License
 
-## &#128214; Citing this work
+
+<h2 id="citation"> &#128214;  Citing this work Inference</h2>
 <details>
 Boadu, F., Wang, Y., Cheng, J. A unified multimodal model for generalizable zero-shot and supervised protein function prediction. Submitted. 
 </details>
