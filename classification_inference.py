@@ -1,19 +1,30 @@
+import argparse
 import os
 import re
 import torch
 from data_processing.extract_data import combine_modalities
-from data_processing.utils import load_pickle, save_pickle
+from data_processing.utils import load_pickle
 from models.model import SeqBindClassifier
 from utils import load_ckp, load_config, load_graph
 from transformers import EsmTokenizer, T5Tokenizer, AutoTokenizer
 from transformers import EsmModel, T5EncoderModel, AutoModel, AutoTokenizer
-import seaborn as sns
-import matplotlib.pyplot as plt
-import numpy as np
-import torch.nn.functional as F
-from data_processing.dataset import CustomDataset, CustomDataCollator
+from data_processing.dataset import  CustomDataCollator
 from torch.utils.data import Dataset, DataLoader
 import networkx as nx
+
+
+thresholds = {
+         "BP": [0.2, 0.1, 0.6, 0.1],
+         "CC": [0.3, 0.1, 0.5, 0.1],
+         "MF": [0.2, 0.1, 0.4, 0.3]
+    }
+
+FUNC_DICT = {
+    'CC': 'GO:0005575',
+    'MF': 'GO:0003674',
+    'BP': 'GO:0008150'
+    }
+
 
 
 class CustomDataCollator:
@@ -49,10 +60,10 @@ class CustomDataCollator:
 
 
 class InferenceDataset(Dataset):
-    def __init__(self, modality,  data_path=None, data_list=None):
+    def __init__(self, modality,  data_path, data_list):
 
         self.modality = modality
-        self.base_path = data_path or '/home/fbqc9/Workspace/MCLLM_DATA/DATA/test'
+        self.base_path = data_path
         self.data_list = data_list
 
         
@@ -60,29 +71,27 @@ class InferenceDataset(Dataset):
         return len(self.data_list)
 
     def __getitem__(self, idx):
-        sample = torch.load(
-            f'{self.base_path}/{self.data_list[idx]}.pt',
-            weights_only=False
-        )
+        protein = self.data_list[idx]
 
-        if self.modality == "Fused":
-            prot = sample['Protein']
-            seq = sample['Sequence']['esm2_t48']
-            struct = sample['Structure']
-            text = sample['Text']
-            interpro = sample['Interpro']
-            return (prot, seq, struct, text, interpro)
+        if self.modality == "Combined":
+            seq_path = os.path.join(self.base_path, "Sequence", f"{protein}.pt")
+            struct_path = os.path.join(self.base_path, "Structure", f"{protein}.pt")
+            text_path = os.path.join(self.base_path, "Text", f"{protein}.pt")
+            interpro_path = os.path.join(self.base_path, "Interpro", f"{protein}.pt")
+
+            seq = torch.load(seq_path)
+            struct = torch.load(struct_path)
+            text = torch.load(text_path)
+            interpro = torch.load(interpro_path)
+            return (protein, seq, struct, text, interpro)
         else:
-            prot = sample['Protein']
-            if self.modality == "Sequence":
-                modality = sample[self.modality]['esm2_t48']
-            else:
-                modality = sample.get(self.modality)
-            return (prot, modality)
+            pth = os.path.join(self.base_path, self.modality, f"{protein}.pt")
+            sample = torch.load(pth, weights_only=False)
+            return (protein, sample)
             
 
 
-def get_embeddings(model, data, modality):
+def get_embeddings(model, data, modality, device='cpu'):
 
     data = str(data)
 
@@ -108,7 +117,7 @@ def get_embeddings(model, data, modality):
     return outputs
 
 
-def get_model(model_name):
+def get_model(model_name, device='cpu'):
     model_map = {
         "esm2_t48": ('facebook/esm2_t48_15B_UR50D', EsmTokenizer, EsmModel),
         "prost5":   ('Rostlab/ProstT5', T5Tokenizer, T5EncoderModel),
@@ -137,31 +146,11 @@ def get_model(model_name):
     return model.to(device)
 
 
-def get_modality_list(data):
-
-    modality_list = {
-        'Sequence': set(),
-        'Structure': set(),
-        'Text': set(),
-        'Interpro': set()
-    }
-    
-    for protein, protein_data in data.items():
-        for modality in modality_list:
-            if modality in protein_data:
-                modality_list[modality].add(protein)
-    
-    all_modalities = set.intersection(*modality_list.values())
-    modality_list['Combined'] = all_modalities
-
-    return modality_list
-
-
-def load_model(ontology, model_name, device):
+def load_model(ontology, device):
     config = load_config('config.yaml')['config1']
     model = SeqBindClassifier(config=config, go_ontology=ontology).to(device)
     ckp_dir = '/home/fbqc9/Workspace/MCLLM_DATA/DATA/saved_models/'
-    ckp_file = ckp_dir + f"{ontology}_{model_name}.pt"
+    ckp_file = ckp_dir + f"{ontology}.pt"
     print("Loading model checkpoint @ {}".format(ckp_file))
     loaded_model = load_ckp(filename=ckp_file, model=model, model_only=True, strict=True)
     return loaded_model
@@ -199,136 +188,88 @@ def fuse_predictions(predictions_dict, modality_weights, go_terms_list, go_graph
     return combined_predictions
 
 
-def main():
-    
 
-    ontology = "BP"
-    model_name = "unfrozen"
-    num_batches = 120
+def generate_embeddings(data, modality, directory, device='cpu'):
+
     encoder =  {'Sequence': 'esm2_t48', 'Structure': 'prost5', 'Interpro': 'llama2', 'Text': 'llama2'}
-    data_path = "/home/fbqc9/Workspace/MCLLM_DATA/DATA/test/dataset_new"  
-    modalities_pred = ["Sequence", "Structure", "Text", "Interpro"]
+    encoding_model = get_model(encoder[modality], device=device)
+
+    proteins = []
+
+    for prot_name in data:
+        embedding = get_embeddings(encoding_model, data[prot_name][modality], modality, device=device)
+        torch.save(embedding, os.path.join(directory, f"{prot_name}.pt"))
+        proteins.append(prot_name)
+
+    return proteins
 
 
-    '''thresholds = {
-        "BP": [0.3, 0.1, 0.5, 0.2],
-        "CC": [0.3, 0.1, 0.4, 0.2],
-        "MF": [0.3, 0.1, 0.3, 0.3]
-    }'''
 
-    thresholds_wo_structure = {
-        "BP": [0.2, 0.0, 0.7, 0.1],
-        "CC": [0.3, 0.0, 0.6, 0.1],
-        "MF": [0.3, 0.0, 0.4, 0.3]
-    }
+def validate_args(args):
+    if not (args.sequence_path or args.structure_path or args.text_path or args.interpro_path):
+        raise ValueError("At least one of --sequence-path, --structure-path, --text-path, or --interpro-path must be provided.")
 
-    thresholds_w_structure = {
-         "BP": [0.2, 0.1, 0.6, 0.1],
-         "CC": [0.3, 0.1, 0.5, 0.1],
-         "MF": [0.2, 0.1, 0.4, 0.3]
-    }
-
-    FUNC_DICT = {
-        'CC': 'GO:0005575',
-        'MF': 'GO:0003674',
-        'BP': 'GO:0008150'
-        }
-
-
-    go_terms_list = load_pickle(f"/home/fbqc9/Workspace/MCLLM_DATA/DATA/data/labels/{ontology}_terms")
-
-
-    sequence_fasta = "/home/fbqc9/Workspace/MCLLM_DATA/DATA/test/raw/sequence.fasta"
-    structure_fasta = "/home/fbqc9/Workspace/MCLLM_DATA/DATA/test/raw/structure.fasta"
-    text_data = "/home/fbqc9/Workspace/MCLLM_DATA/DATA/test/raw/text.txt"
-    interpro_data = "/home/fbqc9/Workspace/MCLLM_DATA/DATA/test/raw/interpro2.txt"
-
-    go_graph = load_graph(graph_pth="/home/fbqc9/Workspace/MCLLM/evaluation/go-basic.obo")
-    go_set = nx.ancestors(go_graph, FUNC_DICT[ontology])
-
-    data = combine_modalities(sequence_data=sequence_fasta, 
-                              structure_data=structure_fasta,
-                              textual_data=text_data, 
-                              interpro_data=interpro_data)
-
-
-    modality_list = get_modality_list(data)
-    test_proteins = load_pickle("/home/fbqc9/Workspace/MCLLM/evaluation/proteins")[ontology].difference(set(['P0DXI8', 'P0DXI6']))
-
-
-    print(len(list(modality_list['Interpro'].intersection(test_proteins))))
-
-
-    generated = os.listdir("/home/fbqc9/Workspace/MCLLM_DATA/DATA/test/dataset_new")
-    generated = set([i.split(".")[0] for i in generated])
-
-    protein_list = list(set(data.keys()) - generated)
-    print(f"Generated: {len(generated)}, Remaining: {len(protein_list)}")
-
-
+    if not os.path.isdir(args.data_path):
+        raise FileNotFoundError(f"Data path not found: {args.data_path}")
     
-    ##### Generate data 
-    if len(protein_list) > 0:
-        encoding_models = {key: get_model(value) for key, value in encoder.items()}
-
-    for prot_name in protein_list:
-
-        try:
-
-            print(prot_name)
+    for path in [args.sequence_path, args.structure_path, args.text_path, args.interpro_path]:
+        if path and not os.path.exists(path):
+            raise FileNotFoundError(f"Input file not found: {path}")
         
-            sequence = data[prot_name].get('Sequence', None)
-            structure = data[prot_name].get('Structure', None)
-            text = data[prot_name].get('Text', None)
-            interpro = data[prot_name].get('Interpro', None)
 
 
-            protein_data = {"Protein": prot_name}
+def prepare_embeddings(args):
+    modalities_proteins = {'Sequence': [], 'Structure': [], 'Text': [], 'Interpro': []}
+    modalities = []
 
-            if sequence:
-                sequence_embedding = get_embeddings(encoding_models["Sequence"], data[prot_name]['Sequence'], "Sequence")
-                protein_data["Sequence"] = sequence_embedding
-                
-            if structure:
-                structures_embedding = get_embeddings(encoding_models["Structure"], data[prot_name]['Structure'], "Structure")
-                protein_data["Structure"] = structures_embedding
+    input_map = {
+        "Sequence": args.sequence_path,
+        "Structure": args.structure_path,
+        "Text": args.text_path,
+        "Interpro": args.interpro_path,
+    }
 
-            if text:
-                texts_embedding = get_embeddings(encoding_models["Text"], data[prot_name]['Text'], "Text")
-                protein_data["Text"] = texts_embedding
+    for modality, path in input_map.items():
+        if path:
+            directory_path = os.path.join(args.working_dir, modality)
+            os.makedirs(directory_path, exist_ok=True)
+            data = combine_modalities(**{modality.lower() + "_data": path}, use_sequence=False)
+            modalities_proteins[modality] = generate_embeddings(data, modality, directory_path, device=args.device)
+            modalities.append(modality)
 
-            if interpro:
-                interpros_embedding = get_embeddings(encoding_models["Interpro"], data[prot_name]['Interpro'], "Interpro")
-                protein_data["Interpro"] = interpros_embedding
-
-            # torch.save(protein_data, f"/home/fbqc9/Workspace/MCLLM_DATA/DATA/test/dataset_new/{prot_name}.pt")
-        except torch.cuda.OutOfMemoryError:
-            pass
+    modalities_proteins['Combined'] = list(set(modalities_proteins['Sequence']) & set(modalities_proteins['Structure']) & set(modalities_proteins['Text']) & set(modalities_proteins['Interpro']))
+    return modalities_proteins, modalities
 
 
-    # load model and predict
-    model = load_model(ontology=ontology, model_name=model_name, device=device)
+def save_results(predictions_dict, output_dir):
+    os.makedirs(args.output, exist_ok=True)
+    for mod, protein_predictions in predictions_dict.items():
+        with open(f"{args.output}/{mod}.tsv", "w") as f:
+            for protein, go_term_scores in protein_predictions.items():
+                for go_term, score in go_term_scores.items():
+                    if score >= 0.01:
+                        f.write(f"{protein}\t{go_term}\t{score:.4f}\n")
+
+
+def perform_inference(args, modalities_proteins, modalities):
+
+    model = load_model(ontology=args.ontology, device=args.device)
     model.eval()
 
+    predictions_dict = {mod: {} for mod in modalities}
 
-    predictions_dict = {
-        "Sequence" : {},
-        "Structure": {},
-        "Text": {}, 
-        "Interpro": {}
-    }
+    go_terms_list =  load_pickle(f"{args.data_path}/{args.ontology}_terms")
+    go_graph = load_graph(f"{args.data_path}/go-basic.obo")
+    go_set = nx.ancestors(go_graph, FUNC_DICT[args.ontology])
+
 
     with torch.no_grad():
-        for mod in modalities_pred:
-            dataset = InferenceDataset(
-                            modality=mod, 
-                            data_path=data_path, 
-                            data_list=list(modality_list[mod].intersection(test_proteins))
-                            )
+        for mod in modalities:
+            dataset = InferenceDataset(modality=mod, data_path=args.working_dir, 
+                                        data_list=modalities_proteins[mod])
             
-            print(mod, len(dataset))
-            collator = CustomDataCollator(modality=mod, device=device)
-            dataloader = DataLoader(dataset, batch_size=num_batches, shuffle=False, collate_fn=collator)
+            collator = CustomDataCollator(modality=mod, device=args.device)
+            dataloader = DataLoader(dataset, batch_size=args.num_batches, shuffle=False, collate_fn=collator)
 
             for batch in dataloader:
                 proteins = batch['Protein']
@@ -350,38 +291,73 @@ def main():
 
                     predictions_dict[mod][protein] = protein_scores
 
-        thresholds_wo_structure
-
-    Consensus_w_structure = fuse_predictions(predictions_dict, 
-                                modality_weights={"Sequence": thresholds_w_structure[ontology][0], 
-                                                  "Structure": thresholds_w_structure[ontology][1],
-                                                  "Text": thresholds_w_structure[ontology][2], 
-                                                  "Interpro": thresholds_w_structure[ontology][3]},
-                                go_terms_list=go_terms_list,
-                                go_graph=go_graph,
-                                go_set=go_set)
-
-    Consensus_wo_structure = fuse_predictions(predictions_dict, 
-                                modality_weights={"Sequence": thresholds_wo_structure[ontology][0], 
-                                                  "Structure": thresholds_wo_structure[ontology][1],
-                                                  "Text": thresholds_wo_structure[ontology][2], 
-                                                  "Interpro": thresholds_wo_structure[ontology][3]},
-                                go_terms_list=go_terms_list,
-                                go_graph=go_graph,
-                                go_set=go_set)
     
+    if len(modalities_proteins['Combined']) > 0:
 
-    predictions_dict["Consensus_wo_structure"] = Consensus_wo_structure
-    predictions_dict['Consensus_w_structure'] = Consensus_w_structure
+        predictions_dict['Combined'] = fuse_predictions(predictions_dict, 
+                                    modality_weights={"Sequence": thresholds[args.ontology][0], 
+                                                    "Structure": thresholds[args.ontology][1],
+                                                    "Text": thresholds[args.ontology][2], 
+                                                    "Interpro": thresholds[args.ontology][3]},
+                                    go_terms_list=go_terms_list,
+                                    go_graph=go_graph,
+                                    go_set=go_set)
+
+
+    return predictions_dict
     
-    for mod, protein_predictions in predictions_dict.items():
-        with open(f"/home/fbqc9/Workspace/MCLLM/evaluation/predictions/{ontology}/{mod}_{model_name}.tsv", "w") as f:
-            for protein, go_term_scores in protein_predictions.items():
-                for go_term, score in go_term_scores.items():
-                    if score >= 0.01:
-                        f.write(f"{protein}\t{go_term}\t{score:.4f}\n")
-
 
 
 if __name__ == "__main__":
-    main()
+    
+    parser = argparse.ArgumentParser(description="Supervised Classification with FunBind.")
+
+    parser.add_argument('--sequence-path', type=str, default=None, help="Path to the input file(Sequence)")
+    parser.add_argument('--structure-path', type=str, default=None, help="Path to the input file(Structure)")
+    parser.add_argument('--text-path', type=str, default=None, help="Path to the input file(Text)")
+    parser.add_argument('--interpro-path', type=str, default=None, help="Path to the input file(Interpro)")
+    parser.add_argument('--ontology', type=str, default="CC", help="Path to data files")
+    parser.add_argument('--data-path', type=str, required=True, help="Path to the pretrained model checkpoint & Go term list & other relevant data.")
+    parser.add_argument('--device', type=str, default='cpu', help="Device to run inference on (cuda or cpu).")
+    parser.add_argument('--num-batches', type=int, default=32, help="Number of batches for inference")
+    parser.add_argument('--working-dir', type=str, default="./", help="Path to generate temporary files")
+    parser.add_argument('--output', type=str, default="results", help="File to save output")
+
+
+    args = parser.parse_args()
+
+    validate_args(args)
+
+    modalities_proteins, modalities = prepare_embeddings(args)
+
+    predictions_dict = perform_inference(args, modalities_proteins, modalities)
+
+    save_results(predictions_dict, args.output)
+
+    
+    
+
+
+    
+
+    
+
+
+    
+        
+
+    
+                        
+
+
+
+
+
+
+
+
+    
+
+    
+
+    

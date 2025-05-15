@@ -16,18 +16,18 @@ It supports both direct `classification` and `zero-shot` prediction of novel fun
 
 - [&#9881;&#65039; Installation Instructions](#installation-instructions)
 - [&#128218; Dataset Format](#dataset-format)
-    - [&#129516; Sequence Data](#sequence-data)
-    - [Structure Data](#structure-data)
-    - [Text Data](#text-data)
-    - [InterPro Data](#interpro-data)
-    - [Ontology Data](#ontology-data)
+    - [&#129516; Sequence Data](#dataset-format)
+    - [&#129521; Structure Data](#dataset-format)
+    - [&#128221; Text Data](#dataset-format)
+    - [&#129513; InterPro Data](#dataset-format)
+    - [&#129504; Ontology Data](#dataset-format)
 - [&#128640; Inference](#inference)
-    - [Zero-shot Inference](#zero-shot-inference)
-    - [Classification Inference](#classification-inference) 
+    - [Zero-shot Inference](#inference)
+    - [Classification Inference](#inference) 
 - [&#128293; Training](#training)
-    - [Self-supervised Pretraining](#self-supervised-pretraining)
-    - [Supervised Function Classification via Fine-Tuning](#supervised-classification)
-    - [Reproducing Experiments](#experiments-conducted)
+    - [Self-supervised Pretraining](#training)
+    - [Supervised Function Classification via Fine-Tuning](#training)
+    - [Reproducing Experiments](#training)
 - [&#128187; Contributors](#contributors)
 - [&#128386; Contact](#contact)
 - [&#128274; License](#license)
@@ -105,8 +105,8 @@ InterPro domain annotations can be generated using **[InterProScan](https://www.
 <h3 id="ontology-data"> &#129504; Ontology Data</h3>
 
  
-Ontology annotations (e.g., Gene Ontology terms) should be provided in a simple text format, where each line contains a **GO ID**.
-**Example:** [`examples/text.txt`](examples/ontology.txt)
+Ontology annotations (e.g., Gene Ontology terms) should be provided in a simple text format, where each line contains a **GO ID**.  
+**Example:** [`examples/ontology.txt`](examples/ontology.txt)
 
 ---
 
