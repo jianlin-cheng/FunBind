@@ -175,8 +175,28 @@ Top 3 term: ('GO:0170039',), Score: 1.13%
 
 
 ```bash
-python train.py --epochs [Number_epoch] --folder [intermediate_folder]
+    python classification_inference.py [-h] 
+      --data-path DATA_PATH 
+      [--sequence-path SEQUENCE_PATH]
+      [--structure-path STRUCTURE_PATH] 
+      [--text-path TEXT_PATH]
+      [--interpro-path INTERPRO_PATH] 
+      [--ontology ONTOLOGY] 
+      [--device DEVICE]
+      [--num-batches NUM_BATCHES] 
+      [--working-dir WORKING_DIR] 
+      [--output OUTPUT]
 ```
+
+
+####  Example:
+
+To run classification using the sample data provided in the examples/ directory:"
+
+```bash
+python python classification_inference.py --sequence-path examples/sequence.fasta --structure-path examples/structure.fasta --data-path /home/fbqc9/Workspace/MCLLM_DATA/DATA/inference --device cuda:0
+```
+
 
 </details>
 
