@@ -1,5 +1,5 @@
 # FunBind: A unified multimodal model for generalizable zero-shot and supervised protein function prediction
-[![View Preprint on bioRxiv](https://img.shields.io/badge/Preprint-bioRxiv-b31b1b)](https://github.com/jianlin-cheng/FunBind/blob/main/model.png)
+[![View Preprint on bioRxiv](https://img.shields.io/badge/Preprint-bioRxiv-b31b1b)](https://www.biorxiv.org/content/10.1101/2025.05.09.653226v1#:~:text=Here,%20we%20present%20FunBind,%20a%20multimodal%20AI%20model,enhance%20prediction%20accuracy%20and%20infer%20previously%20unseen%20functions.)
 
 
 
@@ -9,19 +9,31 @@ It supports both direct `classification` and `zero-shot` prediction of novel fun
 ![Method overview ](models/model.png)
 
 
-## Contents
+## 🗊 Contents
+<details>
+<summary>Table of contents</summary>
 
-- [Installation](#installation)
-- [Dataset](#dataset)
-- [Inference](#inference)
+
+- [Installation Instructions](#&#9881;-installation-instructions)
+- [Dataset Format](#&#128218;-dataset-format)
+    - [Sequence Data](#&#129516;-sequence-data)
+    - [Structure Data](#&#129521;-structure-data)
+    - [Text Data](#&#128221;-text-data)
+    - [InterPro Data](#&#129513;-interpro-data)
+    - [Ontology Data](#&#129504;-ontology-data)
+- [Inference](#&#128640-inference)
     - [Zero-shot Inference](#zero-shot-inference)
-    - [Classification](#function-classification)
-- [Training](#training)
+    - [Classification](#supervised-classification)
+- [Training](#&#128293;-training)
     - [Self-supervised Pretraining](#self-supervised-pretraining)
     - [Supervised Function Classification via Fine-Tuning](#supervised-function-classification-via-fine-tuning)
-- [License](#license)
-- [Citing this work](#reference)
+    - [Reproducing Experiments](#experiments-conducted)
+- [Contributors](#&#128187;-contributors)
+- [Contact](#&#128386;-contact)
+- [License](#&#128274;-license)
+- [Citing this work](#&#128214;-citing-this-work)
 
+</details>
 
 
 ## &#9881; Installation Instructions
@@ -94,12 +106,9 @@ Ontology annotations (e.g., Gene Ontology terms) should be provided in a simple 
 </details>
 
 
-
-
-
 ## &#128640; Inference
 <details>
-
+<summary>Run inference with pre-trained models.</summary>
 
 
 ### Zero-shot Inference
@@ -129,8 +138,6 @@ python zeroshot_inference.py \
     --go-graph examples/go-basic.obo
 ```
 
-
-
 This will give you the output
 ```python
 Predictions for protein: Q64565
@@ -156,7 +163,7 @@ Top 3 term: ('GO:0170039',), Score: 1.13%
 ```
 
 
-### Function Classification
+### Supervised Classification
 
 ```bash
 python train.py --epochs [Number_epoch] --folder [intermediate_folder]
@@ -167,6 +174,7 @@ python train.py --epochs [Number_epoch] --folder [intermediate_folder]
 ## &#128293; Training
 
 <details>
+<summary>Instructions for training the model.</summary>
 
 You can download the preprocessed training and validation data, as well as the data for experiments from (~36 GB total):
 ```
@@ -197,24 +205,42 @@ cafaeval obo-file-path predictions-path groundtruth-file -out_dir output-path -i
 
 </details>
 
-## &#128187; Developer
 
+
+## &#128187; Contributors
 <details>
+<summary>Click to expand</summary>
 
-```
-Frimpong Boadu
-Deparment of Computer Science
-University of Missouri
-Columbia, MO 65211, USA
-Email: fbqc9@missouri.edu
-```
+<p align="left">
+  <a href="https://github.com/frimpz">
+    <img src="https://github.com/frimpz.png" width="50" height="50" style="border-radius: 50%;" />
+  </a>
+  &nbsp;  &nbsp;  &nbsp;   &nbsp;  &nbsp;
+  <a href="https://github.com/yw7bh">
+    <img src="https://github.com/yw7bh.png" width="50" height="50" style="border-radius: 50%;" />
+  </a>
+  &nbsp;  &nbsp;  &nbsp;   &nbsp;  &nbsp;
+  <a href="https://github.com/jianlin-cheng">
+    <img src="https://github.com/jianlin-cheng.png" width="50" height="50" style="border-radius: 50%;" />
+  </a>
+</p>
+
+<p align="left">
+  <a href="https://github.com/frimpz">@frimpz</a>
+  &nbsp;  &nbsp;  &nbsp;   &nbsp;  &nbsp;
+  <a href="https://github.com/yw7bh">@yw7bh</a>
+  &nbsp;  &nbsp;  &nbsp;   &nbsp;  &nbsp;
+  <a href="https://github.com/jianlin-cheng">@jianlin-cheng</a>
+</p>
 </details>
 
 
 ## &#128386; Contact
 <details>
+<summary>Reach us for support or inquiries.</summary>
 
 ```
+
 Jianlin (Jack) Cheng, PhD, AAAS Fellow
 Curators' Distinguished Professor
 William and Nancy Thompson Distinguished Professor
@@ -222,6 +248,7 @@ Department of Electrical Engineering and Computer Science
 University of Missouri
 Columbia, MO 65211, USA
 Email: chengji@missouri.edu
+
 ```
 
 </details>
@@ -229,7 +256,7 @@ Email: chengji@missouri.edu
 ## &#128274; License
 This project is covered under the MIT License
 
-## &#128214; Reference
+## &#128214; Citing this work
 <details>
 Boadu, F., Wang, Y., Cheng, J. A unified multimodal model for generalizable zero-shot and supervised protein function prediction. Submitted. 
 </details>
