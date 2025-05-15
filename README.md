@@ -14,7 +14,7 @@ It supports both direct `classification` and `zero-shot` prediction of novel fun
 <summary>Table of contents</summary>
 
 
-- [Installation Instructions](#&#9881;-installation-instructions)
+- [Installation Instructions](#installation-instructions)
 - [Dataset Format](#&#128218;-dataset-format)
     - [Sequence Data](#&#129516;-sequence-data)
     - [Structure Data](#&#129521;-structure-data)
@@ -35,8 +35,7 @@ It supports both direct `classification` and `zero-shot` prediction of novel fun
 
 </details>
 
-
-## ✅ Installation Instructions
+<h2 id="installation-instructions">⚙️ Installation Instructions</h2>
 <details>
 <summary>To get started with FunBind, follow these steps</summary>
 
