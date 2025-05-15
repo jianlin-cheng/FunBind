@@ -9,7 +9,7 @@ It supports both direct `classification` and `zero-shot` prediction of novel fun
 ![Method overview ](models/model.png)
 
 
-## 🗊 Contents
+## &#128458; Contents
 <details>
 <summary>Table of contents</summary>
 
@@ -36,7 +36,7 @@ It supports both direct `classification` and `zero-shot` prediction of novel fun
 </details>
 
 
-## &#9881; Installation Instructions
+## ✅ Installation Instructions
 <details>
 <summary>To get started with FunBind, follow these steps</summary>
 
