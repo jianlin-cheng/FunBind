@@ -18,11 +18,11 @@ from Const import BASE_DATA_DIR
 
 
 
-def load_model(device):
+def load_model(device, ckp_file):
     config = load_config('config.yaml')['config1']
     model = SeqBindPretrain(config=config).to(device)
-    ckp_dir = '/home/fbqc9/Workspace/MCLLM_DATA/DATA/saved_models/'
-    ckp_file = ckp_dir + "pretrained_ontology.pt"
+    # ckp_dir = '/home/fbqc9/Workspace/MCLLM_DATA/DATA/saved_models/'
+    # ckp_file = ckp_dir + "pretrained_ontology.pt"
     print("Loading model checkpoint @ {}".format(ckp_file))
     load_model = load_ckp(filename=ckp_file, model=model, model_only=True)
     return load_model
@@ -80,6 +80,7 @@ def get_model(model_name, device):
         raise ValueError(f"Model {model_name} is not recognized.")
     
     model_path, tokenizer_class, model_class = model_info
+    # print(f">>>>>>>>>>>>>>>>>........... The model path: {model_path}")
 
     if 'prost5' in model_name:
         tokenizer = tokenizer_class.from_pretrained(model_path, do_lower_case=False)
@@ -200,7 +201,7 @@ if __name__ == '__main__':
     ontology_embeddings = get_embeddings(get_model("llama2", args.device), ontology_text, "Ontology", device=args.device)
 
     # Load model
-    model = load_model(args.device)
+    model = load_model(args.device, args.model_checkpoint)
     model.eval()
 
 
