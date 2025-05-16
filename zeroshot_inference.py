@@ -136,6 +136,11 @@ def generate_embeddings(data, modality="Sequence"):
     for protein, values in data.items():
         raw_data = values[modality]
         embeddings[protein] = get_embeddings(model, raw_data, modality, device=args.device)
+
+
+    print(embeddings)
+
+    exit()
     return embeddings
 
 
@@ -187,7 +192,7 @@ if __name__ == '__main__':
     elif args.modality == 'Structure':
         data = combine_modalities(structure_data=args.input_path, use_sequence=False)
     elif args.modality == 'Text':
-        data = combine_modalities(textual_data=args.input_path, use_sequence=False)
+        data = combine_modalities(text_data=args.input_path, use_sequence=False)
     elif args.modality == 'Interpro':
         data = combine_modalities(interpro_data=args.input_path, use_sequence=False)
 
