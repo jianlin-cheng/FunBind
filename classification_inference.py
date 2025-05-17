@@ -93,10 +93,10 @@ class InferenceDataset(Dataset):
 
 def get_embeddings(model, data, modality, device='cpu'):
 
-    data = str(data)
-
+    if modality == "Sequence":
+        data = str(data)
     if modality == "Structure":
-        data = data.lower()
+        data = str(data).lower()
         data = re.sub(r"[UZOB]", "X", data)
         data = " ".join(list(data))
         data = "<fold2AA>" + " " + data
@@ -143,6 +143,7 @@ def get_model(model_name, device='cpu'):
         tokenizer.padding_side = "right"
 
     model.tokenizer = tokenizer
+    model.eval()
     return model.to(device)
 
 
@@ -312,12 +313,12 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description="Supervised Classification with FunBind.")
 
+    parser.add_argument('--data-path', type=str, required=True, help="Path to the pretrained model checkpoint & Go term list & other relevant data.")
     parser.add_argument('--sequence-path', type=str, default=None, help="Path to the input file(Sequence)")
     parser.add_argument('--structure-path', type=str, default=None, help="Path to the input file(Structure)")
     parser.add_argument('--text-path', type=str, default=None, help="Path to the input file(Text)")
     parser.add_argument('--interpro-path', type=str, default=None, help="Path to the input file(Interpro)")
     parser.add_argument('--ontology', type=str, default="CC", help="Path to data files")
-    parser.add_argument('--data-path', type=str, required=True, help="Path to the pretrained model checkpoint & Go term list & other relevant data.")
     parser.add_argument('--device', type=str, default='cpu', help="Device to run inference on (cuda or cpu).")
     parser.add_argument('--num-batches', type=int, default=32, help="Number of batches for inference")
     parser.add_argument('--working-dir', type=str, default="./", help="Path to generate temporary files")
@@ -325,10 +326,12 @@ if __name__ == "__main__":
 
 
     args = parser.parse_args()
+    
 
     validate_args(args)
 
     modalities_proteins, modalities = prepare_embeddings(args)
+
 
     predictions_dict = perform_inference(args, modalities_proteins, modalities)
 
