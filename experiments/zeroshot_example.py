@@ -1,15 +1,20 @@
+import os
 import re
+import sys
 import numpy as np
 import torch
 from transformers import EsmTokenizer, T5Tokenizer, AutoTokenizer
 from transformers import EsmModel, T5EncoderModel, AutoModel
-from models.model import SeqBindPretrain
 import seaborn as sns
 import matplotlib.pyplot as plt
 import torch.nn.functional as F
 import pandas as pd
-from utils import load_ckp, load_config, load_graph
 
+sys.path.append(os.path.abspath('/home/fbqc9/Workspace/MCLLM/'))
+
+from models.model import SeqBindPretrain
+from utils import load_ckp, load_config, load_graph
+from Const import BASE_DATA_DIR
 
 
 def process_ontology(go_graph, ontology_list):
@@ -93,7 +98,7 @@ def get_embeddings(model, data, modality):
 def load_model():
     config = load_config('config.yaml')['config1']
     model = SeqBindPretrain(config=config).to(device)
-    ckp_dir = '/home/fbqc9/Workspace/MCLLM_DATA/DATA/saved_models/'
+    ckp_dir = BASE_DATA_DIR + '/saved_models/'
     ckp_file = ckp_dir + "pretrained_ontology.pt"
     print("Loading model checkpoint @ {}".format(ckp_file))
     load_model = load_ckp(filename=ckp_file, model=model, model_only=True)
@@ -101,7 +106,7 @@ def load_model():
 
 
 def load_embedding(prot_name, modality1):
-    x = torch.load(f'/home/fbqc9/Workspace/MCLLM_DATA/DATA/test/dataset_new/{prot_name}.pt')
+    x = torch.load(f'{BASE_DATA_DIR}/test/dataset/{prot_name}.pt')
 
     #model_map = {"Sequence": "esm2_t48", "Structure": "prost5", "Text": "llama2", "Interpro": "llama2"}
 
@@ -120,11 +125,6 @@ def compute_similarity(protein_list, term_list, modality1, model):
     
     ontology_text = process_ontology(go_graph, term_list)
     ontology_embeddings = get_embeddings(get_model("llama2"), ontology_text, "Ontology")
-
-
-    print(ontology_embeddings)
-
-    exit()
 
 
     with torch.no_grad():
@@ -223,7 +223,7 @@ def visualize_top_go_terms(protein_names, sims, term_list, term_names, go_term_c
     
     plt.legend([], [], frameon=False)
     plt.tight_layout()
-    plt.savefig(f"go_terms_{modality}.png", dpi=300)
+    plt.savefig(f"{BASE_DATA_DIR}/figures/go_terms_{modality}.png", dpi=300)
     plt.clf()
     plt.close(fig)
 
@@ -245,14 +245,14 @@ def visualize_go_legends(go_term_names, go_term_colors):
     plt.legend(handles=handles, loc="center", ncol=1, fontsize=24, frameon=False, handlelength=4)
 
     plt.axis("off")
-    plt.savefig("go_legend.png", dpi=300, bbox_inches="tight")
+    plt.savefig(BASE_DATA_DIR + "/figures/go_legend.png", dpi=300, bbox_inches="tight")
     plt.close()
 
 
 
 def main():
     
-    modality = "Interpro"
+    modality = "Structure"
 
     protein_list = ["A8BPK8",  "P18335", "Q12198", "Q64565"]
     term_list = [('GO:0097558',), ('GO:0097559',), ('GO:0097560',),
@@ -298,6 +298,6 @@ def main():
 if __name__ == "__main__":
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    device = "cuda:1"
+    #device = "cpu"
 
     main()
