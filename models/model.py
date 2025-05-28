@@ -3,51 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-expert_configs = {
-    "MF": {
-        'Sequence': [(3072, 1600, 1529), (2048, 1600, 1529), (1600, 1529)],
-        'Structure': [(1280, 1400, 1529), (1056, 1400, 1529), (1280, 1529)],
-        'Text': [(2048, 1600, 1529), (3072, 1600, 1529), (1600, 1529)],
-        'Interpro': [(2048, 1600, 1529), (3072, 1600, 1529), (1600, 1529)]
-    },
-    "CC": {
-        'Sequence': [(2048, 1280, 1043), (1440, 1280, 1043), (1280, 1043)],
-        'Structure': [(512, 768, 1043), (512, 768, 1043), (768, 1043)],
-        'Text': [(2048, 1280, 1043), (1440, 1280, 1043), (1280, 1043)],
-        'Interpro': [(2048, 1280, 1043), (1440, 1280, 1043), (1280, 1043)]
-    },
-    "BP": {
-        'Sequence': [(3072, 1664, 1631), (2560, 1664, 1631), (1664, 1631)],
-        'Structure': [(1280, 1600, 1631), (1536, 1600, 1631), (1600, 1631)],
-        'Text': [(2560, 1664, 1631), (2048, 1664, 1631), (1664, 1631)],
-        'Interpro': [(2560, 1664, 1631), (2048, 1664, 1631), (1664, 1631)]
-    }
-}
-
-
-expert_configs = {
-    "MF": {
-        'Sequence': [(1440, 1504, 1529),],
-        'Structure':[(1440, 1504, 1529),],
-        'Text':     [(1440, 1504, 1529),],
-        'Interpro': [(1440, 1504, 1529),]
-    },
-    "CC": {
-        'Sequence':  [(1120, 1056, 1043)],
-        'Structure': [(1120, 1056, 1043)],
-        'Text':      [(1120, 1056, 1043)],
-        'Interpro':  [(1120, 1056, 1043)]
-    },
-    "BP": {
-        'Sequence':  [(1440, 1568, 1631)],
-        'Structure': [(1440, 1568, 1631)],
-        'Text':      [(1440, 1568, 1631)],
-        'Interpro':  [(1440, 1568, 1631)]
-    }
-}
-
-
-
 class EmbeddingEncoder(nn.Module):
     def __init__(self, in_features, hidden_dims):
         super(EmbeddingEncoder, self).__init__()
@@ -114,12 +69,12 @@ class ExpertHead(nn.Module):
         
 
 class SeqBindBase(nn.Module):
-    def __init__(self, config, expert_configs=None):
+    def __init__(self, configs):
         super(SeqBindBase, self).__init__()
 
         self.modality_encoder = nn.ModuleDict({
-            f'{modality}_modality': ExpertHead(config[modality]['input_dim'], expert_configs)
-            for modality, expert_configs in expert_configs.items()
+            f'{modality}_modality': ExpertHead(_configs['input_dim'], _configs['expert_configs'])
+            for modality, _configs in configs.items()
         })
         self.modalities = list(self.modality_encoder.keys())
 
@@ -131,19 +86,9 @@ class SeqBindBase(nn.Module):
 
 
 class SeqBindPretrain(SeqBindBase):
-    def __init__(self, config, expert_configs=None):
-        expert_configs = {
-            'Sequence': [(3072, 1440, 1280), (1600, 1440, 1280), (1440, 1280)],
-            #'Sequence': [(1088, 1152, 1280), (1600, 1248, 1280), (1024, 1280)],
-            'Structure': [(1088, 1152, 1280), (1600, 1248, 1280), (1024, 1280)],
-            'Text': [(2048, 1440, 1280), (1536, 1440, 1280), (1440, 1280)],
-            #'Text': [(1088, 1152, 1280), (1600, 1248, 1280), (1024, 1280)],
-            'Interpro': [(2048, 1440, 1280), (1536, 1440, 1280), (1440, 1280)],
-            #'Interpro': [(1088, 1152, 1280), (1600, 1248, 1280), (1024, 1280)],
-            'Ontology': [(2048, 1440, 1280), (1536, 1440, 1280), (1440, 1280)]
-        }
+    def __init__(self, pretrain_config=None):
 
-        super(SeqBindPretrain, self).__init__(config, expert_configs)
+        super(SeqBindPretrain, self).__init__(pretrain_config)
 
     def forward(self, inputs):
         encoder_outputs, expert_outputs  = {}, {}
@@ -157,14 +102,13 @@ class SeqBindPretrain(SeqBindBase):
 
 
 class SeqBindClassifier(SeqBindPretrain):
-    def __init__(self, config, go_ontology=None, pretrained_model_path=None):
+    def __init__(self, pretrain_config, classifier_config):
 
-        expert_config = expert_configs[go_ontology]
-        super(SeqBindClassifier, self).__init__(config)
+        super(SeqBindClassifier, self).__init__(pretrain_config=pretrain_config)
 
         self.classifier =  nn.ModuleDict({
-            f'{modality}_modality': ExpertHead(1280, _expert_config)
-            for modality, _expert_config in expert_config.items()
+            f'{modality}_modality': ExpertHead(pretrain_config[modality]['output_dim'], _expert_config)
+            for modality, _expert_config in classifier_config.items()
         })
 
 

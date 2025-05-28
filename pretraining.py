@@ -3,8 +3,8 @@ import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader
 import wandb
-from Loss import DiversityLoss, InfoNCELoss
-from Metrics import Similarity
+from models.Loss import DiversityLoss, InfoNCELoss
+from models.Metrics import Similarity
 from data_processing.dataset import CustomDataset, CustomDataCollator
 from data_processing.utils import load_pickle
 from models.model import SeqBindPretrain
@@ -203,10 +203,11 @@ if __name__ == '__main__':
     parser.add_argument('--lr', type=float, default=0.0005, help='Initial learning rate.')
     parser.add_argument('--train_batch', type=int, default=512, help='Training batch size.')
     parser.add_argument('--valid_batch', type=int, default=512, help='Validation batch size.')
-    parser.add_argument('--wandb', default=False, help='Send to wandb')
+    parser.add_argument('--wandb', default=True, help='Send to wandb')
     parser.add_argument('--save_model', default=False, help='Save model.')
     parser.add_argument('--load_weights', default=False, help='Load saved model.')
     parser.add_argument('--weight_decay', type=float, default=1e-5, help='Weight decay for optimizer.')
+    parser.add_argument('--configuration', type=str, choices=['esm2', 'prostt5', 'biobert'], default='esm2', help='Configuration settings.')
 
     args = parser.parse_args()
 
@@ -218,35 +219,35 @@ if __name__ == '__main__':
     else:
         args.device = "cpu"
 
-    args.device = "cuda:0"
-
-    config = load_config('config.yaml')['config_prostt5']
+    args.configuration = "biobert"
+    config = load_config('config.yaml')
+    pretrain_config = config['pretraining_configs'][args.configuration]
 
 
     train_dataloaders = {
-        "Sequence_Structure": load_data(modality_pair="Sequence_Structure", config=config, batch_size=args.train_batch, device=args.device, shuffle=True),
-        "Sequence_Text": load_data(modality_pair="Sequence_Text", config=config, batch_size=args.train_batch, device=args.device, shuffle=True),
-        "Sequence_Interpro": load_data(modality_pair="Sequence_Interpro", config=config, batch_size=args.train_batch, device=args.device, shuffle=True),
-        "Sequence_Ontology": load_data(modality_pair="Sequence_Ontology", config=config, batch_size=args.train_batch, device=args.device, shuffle=True),
+        "Sequence_Structure": load_data(modality_pair="Sequence_Structure", config=pretrain_config, batch_size=args.train_batch, device=args.device, shuffle=True),
+        "Sequence_Text": load_data(modality_pair="Sequence_Text", config=pretrain_config, batch_size=args.train_batch, device=args.device, shuffle=True),
+        "Sequence_Interpro": load_data(modality_pair="Sequence_Interpro", config=pretrain_config, batch_size=args.train_batch, device=args.device, shuffle=True),
+        "Sequence_Ontology": load_data(modality_pair="Sequence_Ontology", config=pretrain_config, batch_size=args.train_batch, device=args.device, shuffle=True),
     }
 
     
     val_dataloaders = {
-        "Sequence_Structure": load_data(modality_pair="Sequence_Structure", config=config, batch_size=args.valid_batch, device=args.device, shuffle=False, validation=True),
-        "Sequence_Text": load_data(modality_pair="Sequence_Text", config=config, batch_size=args.valid_batch, device=args.device, shuffle=False, validation=True),
-        "Sequence_Interpro": load_data(modality_pair="Sequence_Interpro", config=config, batch_size=args.valid_batch, device=args.device, shuffle=False, validation=True),
-        "Structure_Text": load_data(modality_pair="Structure_Text", config=config, batch_size=args.valid_batch, device=args.device, shuffle=False, validation=True),
-        "Structure_Interpro": load_data(modality_pair="Structure_Interpro", config=config, batch_size=args.valid_batch, device=args.device, shuffle=False, validation=True),
-        "Text_Interpro": load_data(modality_pair="Text_Interpro", config=config, batch_size=args.valid_batch, device=args.device, shuffle=False, validation=True),
+        "Sequence_Structure": load_data(modality_pair="Sequence_Structure", config=pretrain_config, batch_size=args.valid_batch, device=args.device, shuffle=False, validation=True),
+        "Sequence_Text": load_data(modality_pair="Sequence_Text", config=pretrain_config, batch_size=args.valid_batch, device=args.device, shuffle=False, validation=True),
+        "Sequence_Interpro": load_data(modality_pair="Sequence_Interpro", config=pretrain_config, batch_size=args.valid_batch, device=args.device, shuffle=False, validation=True),
+        "Structure_Text": load_data(modality_pair="Structure_Text", config=pretrain_config, batch_size=args.valid_batch, device=args.device, shuffle=False, validation=True),
+        "Structure_Interpro": load_data(modality_pair="Structure_Interpro", config=pretrain_config, batch_size=args.valid_batch, device=args.device, shuffle=False, validation=True),
+        "Text_Interpro": load_data(modality_pair="Text_Interpro", config=pretrain_config, batch_size=args.valid_batch, device=args.device, shuffle=False, validation=True),
 
-        "Sequence_Ontology": load_data(modality_pair="Sequence_Ontology", config=config, batch_size=args.valid_batch, device=args.device, shuffle=False, validation=True),
-        "Structure_Ontology": load_data(modality_pair="Structure_Ontology", config=config, batch_size=args.valid_batch, device=args.device, shuffle=False, validation=True),
-        "Text_Ontology": load_data(modality_pair="Text_Ontology", config=config, batch_size=args.valid_batch, device=args.device, shuffle=False, validation=True),
-        "Interpro_Ontology": load_data(modality_pair="Interpro_Ontology", config=config, batch_size=args.valid_batch, device=args.device, shuffle=False, validation=True)
+        "Sequence_Ontology": load_data(modality_pair="Sequence_Ontology", config=pretrain_config, batch_size=args.valid_batch, device=args.device, shuffle=False, validation=True),
+        "Structure_Ontology": load_data(modality_pair="Structure_Ontology", config=pretrain_config, batch_size=args.valid_batch, device=args.device, shuffle=False, validation=True),
+        "Text_Ontology": load_data(modality_pair="Text_Ontology", config=pretrain_config, batch_size=args.valid_batch, device=args.device, shuffle=False, validation=True),
+        "Interpro_Ontology": load_data(modality_pair="Interpro_Ontology", config=pretrain_config, batch_size=args.valid_batch, device=args.device, shuffle=False, validation=True)
     }
 
 
-    model = SeqBindPretrain(config=config).to(args.device)
+    model = SeqBindPretrain(pretrain_config=pretrain_config).to(args.device)
     print(model)
 
 

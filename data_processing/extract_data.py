@@ -193,14 +193,14 @@ def extract_proteins_from_fasta(file_path):
 
 
 
-def combine_modalities(sequence_data=None, structure_data=None, textual_data=None, interpro_data=None, use_sequence=True):
+def combine_modalities(sequence_data=None, structure_data=None, text_data=None, interpro_data=None, use_sequence=True):
     """
     Combine data from multiple modalities into a unified representation.
 
     Args:
         sequence_data (str): Path to fasta sequence file
         structure_data (str): Path to Structural sequence file
-        textual_data (): Path to textual data
+        text_data (): Path to textual data
         interpro_data (): Path to interpro data
         use_sequence (bool): Flag to indicate whether to use sequence data.
 
@@ -223,8 +223,8 @@ def combine_modalities(sequence_data=None, structure_data=None, textual_data=Non
     if structure_data:
         structures = fasta_to_dic(structure_data, sep="-", pos=1)
 
-    if textual_data:
-        text = collect_textual_annotation(proteins, textual_data)
+    if text_data:
+        text = collect_textual_annotation(proteins, text_data)
 
     if interpro_data:
         interpros = parse_protein2ipr(proteins, interpro_data, text)
@@ -281,7 +281,7 @@ if __name__ == "__main__":
     interpro_data = "/home/fbqc9/Workspace/MCLLM_DATA/DATA/test_data/interpro.dat"
 
     data = combine_modalities(sequence_data=sequence_fasta, structure_data=structure_fasta,
-                       textual_data=text_data, interpro_data=interpro_data)
+                       text_data=text_data, interpro_data=interpro_data)
     
 
     for i in data:

@@ -4,8 +4,8 @@ import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader
 import wandb
-from Loss import  InfoNCELoss, DiversityLoss
-from Metrics import PreRecF
+from models.Loss import  InfoNCELoss, DiversityLoss
+from models.Metrics import PreRecF
 from data_processing.dataset import CustomDataset, CustomDataCollator
 from models.model import SeqBindClassifier
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
@@ -90,7 +90,7 @@ def run_epoch(model, dataloader, labels, criteria, metrics, optimizer=None, is_t
                         div_loss = criteria["diversity"](expert_outputs[f'{pair1}_modality']) + \
                                 criteria["diversity"](expert_outputs[f'{pair2}_modality'])
                         
-                        loss = cls_loss #+ 0.01 * div_loss #+  0.5 * con_loss
+                        loss = cls_loss
                         
                         counts[f'{pair1}'] += 1
                         counts[f'{pair2}'] += 1
@@ -191,15 +191,13 @@ if __name__ == '__main__':
     parser.add_argument('--lr', type=float, default=0.00002, help='Initial learning rate.')
     parser.add_argument('--train_batch', type=int, default=50, help='Training batch size.')
     parser.add_argument('--valid_batch', type=int, default=50, help='Validation batch size.')
-    parser.add_argument('--wandb', default=False, help='Send to wandb')
+    parser.add_argument('--wandb', default=True, help='Send to wandb')
     parser.add_argument('--save_model', default=False, help='Save model.')
     parser.add_argument('--load_weights', default=False, help='Load saved model.')
     parser.add_argument('--weight_decay', type=float, default=1e-5, help='Weight decay for optimizer.')
     parser.add_argument('--go_ontology', type=str, choices=['CC', 'MF', 'BP'], default='CC', help="Specific Ontology")
+    parser.add_argument('--configuration', type=str, choices=['esm2', 'prostt5'], default='esm2', help='Configuration settings.')
     args = parser.parse_args()
-
-    # parser.add_argument('--lr', type=float, default=0.00002, help='Initial learning rate.')
-
 
     set_seed(42) 
 
@@ -209,29 +207,35 @@ if __name__ == '__main__':
     else:
         args.device = "cpu"
 
-    config = load_config('config.yaml')['config1']
+    args.go_ontology = "MF"
+    args.configuration = "prostt5"
+
+    config = load_config('config.yaml')
+    pretrain_config = config['pretraining_configs'][args.configuration]
+    classifier_config = config['classification_configs'][args.go_ontology]
+
 
     # batch_sizes = [round(batch_size_smallest * (size / dataset_sizes[0])) for size in dataset_sizes]
     train_dataloaders = {
-        "Sequence_Text": load_data(modality_pair="Sequence_Text", config=config, batch_size=500, device=args.device, shuffle=True),
-        "Sequence_Interpro": load_data(modality_pair="Sequence_Interpro", config=config, batch_size=580, device=args.device, shuffle=True),
-        "Sequence_Structure": load_data(modality_pair="Sequence_Structure", config=config, batch_size=570, device=args.device, shuffle=True),
+        "Sequence_Text": load_data(modality_pair="Sequence_Text", config=pretrain_config, batch_size=500, device=args.device, shuffle=True),
+        "Sequence_Interpro": load_data(modality_pair="Sequence_Interpro", config=pretrain_config, batch_size=580, device=args.device, shuffle=True),
+        "Sequence_Structure": load_data(modality_pair="Sequence_Structure", config=pretrain_config, batch_size=570, device=args.device, shuffle=True),
     }
 
 
     val_dataloaders = {
-        "Sequence_Structure": load_data(modality_pair="Sequence_Structure", config=config, batch_size=args.valid_batch, device=args.device, shuffle=False, validation=True),
-        "Sequence_Text": load_data(modality_pair="Sequence_Text", config=config, batch_size=args.valid_batch, device=args.device, shuffle=False, validation=True),
-        "Sequence_Interpro": load_data(modality_pair="Sequence_Interpro", config=config, batch_size=args.valid_batch, device=args.device, shuffle=False, validation=True),
+        "Sequence_Structure": load_data(modality_pair="Sequence_Structure", config=pretrain_config, batch_size=args.valid_batch, device=args.device, shuffle=False, validation=True),
+        "Sequence_Text": load_data(modality_pair="Sequence_Text", config=pretrain_config, batch_size=args.valid_batch, device=args.device, shuffle=False, validation=True),
+        "Sequence_Interpro": load_data(modality_pair="Sequence_Interpro", config=pretrain_config, batch_size=args.valid_batch, device=args.device, shuffle=False, validation=True),
     }
 
     groundtruth = load_pickle(BASE_DATA_DIR + "/data/labels/{}_labels".format(args.go_ontology))
     info_acc = load_pickle(BASE_DATA_DIR + "/data/labels/{}_ia".format(args.go_ontology))
-    
 
-    model = SeqBindClassifier(config=config, go_ontology=args.go_ontology).to(args.device)
-    _ckp_file = BASE_DATA_DIR + '/saved_models/pretrained_ontology.pt'
-    model = load_ckp(filename=_ckp_file, model=model, model_only=True, strict=False) 
+    model = SeqBindClassifier(pretrain_config=pretrain_config, classifier_config=classifier_config).to(args.device)
+    ckp_file = BASE_DATA_DIR + f'/saved_models/pretrained_ontology_{args.configuration}.pt'
+    # Initialize model with pretrained weights if available
+    model = load_ckp(filename=ckp_file, model=model, model_only=True, strict=False)
     print(model)
 
 
@@ -277,7 +281,7 @@ if __name__ == '__main__':
     lr_scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=20, T_mult=2, eta_min=1e-6)
 
     ckp_dir = BASE_DATA_DIR + '/saved_models/'
-    ckp_file = ckp_dir + "{}.pt".format(args.go_ontology)
+    ckp_file = ckp_dir + f'{args.go_ontology}_{args.configuration}.pt'
 
     if args.load_weights and os.path.exists(ckp_file):
         print("Loading model checkpoint @ {}".format(ckp_file))
