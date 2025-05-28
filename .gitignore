@@ -4,5 +4,6 @@ __pycache__/
 logs/
 evaluation/
 temp/
+todelete/
 *.pyc
 MCLLM.code-workspace
