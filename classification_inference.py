@@ -90,17 +90,34 @@ class InferenceDataset(Dataset):
             return (protein, sample)
             
 
-
-def get_embeddings(model, data, modality, device='cpu'):
+def _preprocess(data, modality):
+    data = str(data)
 
     if modality == "Sequence":
-        data = str(data)
-    if modality == "Structure":
+        data = str(data).upper()
+    elif modality == "Structure":
         data = str(data).lower()
-        data = re.sub(r"[UZOB]", "X", data)
-        data = " ".join(list(data))
+
+    data = re.sub(r"[UZOB]", "X", data)
+    data = " ".join(list(data))
+
+    if modality == "Sequence":
+        data = "<AA2fold>" + " " + data
+    elif modality == "Structure":
         data = "<fold2AA>" + " " + data
 
+    return data
+
+
+def get_embeddings(model, base_model, data, modality, device='cpu'):
+
+    if modality == "Sequence":
+        if base_model == "prostt5":
+            data = _preprocess(data, modality)
+        else:
+            data = str(data)
+    if modality == "Structure":
+        data = _preprocess(data, modality)
 
     if modality == "Text" or modality == "Interpro" or modality == "Ontology":
         inputs = model.config.tokenizer(data, return_tensors="pt", max_length=1024, padding='max_length', truncation=True)
@@ -120,7 +137,7 @@ def get_embeddings(model, data, modality, device='cpu'):
 def get_model(model_name, device='cpu'):
     model_map = {
         "esm2_t48": ('facebook/esm2_t48_15B_UR50D', EsmTokenizer, EsmModel),
-        "prost5":   ('Rostlab/ProstT5', T5Tokenizer, T5EncoderModel),
+        "prostt5":   ('Rostlab/ProstT5', T5Tokenizer, T5EncoderModel),
         "llama2":   ('meta-llama/Llama-2-7b-hf', AutoTokenizer, AutoModel),
     }
 
@@ -130,7 +147,7 @@ def get_model(model_name, device='cpu'):
     
     model_path, tokenizer_class, model_class = model_info
 
-    if 'prost5' in model_name:
+    if 'prostt5' in model_name:
         tokenizer = tokenizer_class.from_pretrained(model_path, do_lower_case=False)
     else:
         tokenizer = tokenizer_class.from_pretrained(model_path)
@@ -147,11 +164,13 @@ def get_model(model_name, device='cpu'):
     return model.to(device)
 
 
-def load_model(ontology, device):
-    config = load_config('config.yaml')['config1']
-    model = SeqBindClassifier(config=config, go_ontology=ontology).to(device)
-    ckp_dir = '/home/fbqc9/Workspace/MCLLM_DATA/DATA/saved_models/'
-    ckp_file = ckp_dir + f"{ontology}.pt"
+def load_model(ontology, ckp_dir, base_model, device):
+    config = load_config('config.yaml')
+    pretrain_config = config['pretraining_configs'][base_model]
+    classifier_config = config['classification_configs'][ontology]
+    model = SeqBindClassifier(pretrain_config=pretrain_config, classifier_config=classifier_config).to(device)
+    
+    ckp_file = f'{ckp_dir}/{ontology}_{base_model}.pt'
     print("Loading model checkpoint @ {}".format(ckp_file))
     loaded_model = load_ckp(filename=ckp_file, model=model, model_only=True, strict=True)
     return loaded_model
@@ -190,15 +209,19 @@ def fuse_predictions(predictions_dict, modality_weights, go_terms_list, go_graph
 
 
 
-def generate_embeddings(data, modality, directory, device='cpu'):
+def generate_embeddings(data, modality, base_model, directory, device='cpu'):
 
-    encoder =  {'Sequence': 'esm2_t48', 'Structure': 'prost5', 'Interpro': 'llama2', 'Text': 'llama2'}
-    encoding_model = get_model(encoder[modality], device=device)
+    encoder =  {'Sequence': 'esm2_t48', 'Structure': 'prostt5', 'Interpro': 'llama2', 'Text': 'llama2'}
+    
+    if modality ==  'Sequence' and base_model == 'prostt5':
+        encoding_model = get_model("prostt5", device=device)
+    else:
+        encoding_model = get_model(encoder[modality], device=device)
 
     proteins = []
 
     for prot_name in data:
-        embedding = get_embeddings(encoding_model, data[prot_name][modality], modality, device=device)
+        embedding = get_embeddings(encoding_model, base_model, data[prot_name][modality], modality, device=device)
         torch.save(embedding, os.path.join(directory, f"{prot_name}.pt"))
         proteins.append(prot_name)
 
@@ -235,7 +258,7 @@ def prepare_embeddings(args):
             directory_path = os.path.join(args.working_dir, modality)
             os.makedirs(directory_path, exist_ok=True)
             data = combine_modalities(**{modality.lower() + "_data": path}, use_sequence=False)
-            modalities_proteins[modality] = generate_embeddings(data, modality, directory_path, device=args.device)
+            modalities_proteins[modality] = generate_embeddings(data, modality, args.base_model, directory_path, device=args.device)
             modalities.append(modality)
 
     modalities_proteins['Combined'] = list(set(modalities_proteins['Sequence']) & set(modalities_proteins['Structure']) & set(modalities_proteins['Text']) & set(modalities_proteins['Interpro']))
@@ -254,7 +277,7 @@ def save_results(predictions_dict, output_dir):
 
 def perform_inference(args, modalities_proteins, modalities):
 
-    model = load_model(ontology=args.ontology, device=args.device)
+    model = load_model(ontology=args.ontology, ckp_dir=args.data_path, base_model=args.base_model, device=args.device)
     model.eval()
 
     predictions_dict = {mod: {} for mod in modalities}
@@ -319,8 +342,9 @@ if __name__ == "__main__":
     parser.add_argument('--text-path', type=str, default=None, help="Path to the input file(Text)")
     parser.add_argument('--interpro-path', type=str, default=None, help="Path to the input file(Interpro)")
     parser.add_argument('--ontology', type=str, default="CC", help="Path to data files")
-    parser.add_argument('--device', type=str, default='cpu', help="Device to run inference on (cuda or cpu).")
+    parser.add_argument('--base-model', type=str, choices=['esm2', 'prostt5'], default='esm2', help='Base model to use.')
     parser.add_argument('--num-batches', type=int, default=32, help="Number of batches for inference")
+    parser.add_argument('--device', type=str, default='cpu', help="Device to run inference on (cuda or cpu).")
     parser.add_argument('--working-dir', type=str, default="./", help="Path to generate temporary files")
     parser.add_argument('--output', type=str, default="results", help="File to save output")
 

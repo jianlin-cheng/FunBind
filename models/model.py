@@ -76,13 +76,13 @@ class SeqBindBase(nn.Module):
             f'{modality}_modality': ExpertHead(_configs['input_dim'], _configs['expert_configs'])
             for modality, _configs in configs.items()
         })
+        
         self.modalities = list(self.modality_encoder.keys())
 
     def encode_modality(self, modality, value):
         if modality not in self.modality_encoder:
             raise ValueError(f"Modality '{modality}' not found in modality encoders.")
         return self.modality_encoder[modality](value)
-
 
 
 class SeqBindPretrain(SeqBindBase):
@@ -100,7 +100,6 @@ class SeqBindPretrain(SeqBindBase):
         return encoder_outputs, expert_outputs
 
 
-
 class SeqBindClassifier(SeqBindPretrain):
     def __init__(self, pretrain_config, classifier_config):
 
@@ -111,9 +110,7 @@ class SeqBindClassifier(SeqBindPretrain):
             for modality, _expert_config in classifier_config.items()
         })
 
-
         self.sigmoid = nn.Sigmoid()
-
         
     def forward(self, inputs):
 

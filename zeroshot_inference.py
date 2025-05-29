@@ -4,11 +4,9 @@ from transformers import EsmTokenizer, T5Tokenizer, AutoTokenizer
 from transformers import EsmModel, T5EncoderModel, AutoModel
 import re
 import torch.nn.functional as F
-from models.Metrics import Retrieve_MRR, Retrive_at_k
 from data_processing.extract_data import combine_modalities
 from models.model import SeqBindPretrain
 from utils import load_ckp, load_config, load_graph
-from Const import BASE_DATA_DIR
 
 
 # TODO: 
@@ -17,12 +15,12 @@ from Const import BASE_DATA_DIR
 # 3. Add inference with other base models
 
 
+def load_model(device, ckp_dir, base_model):
 
-def load_model(device, ckp_file):
-    config = load_config('config.yaml')['config1']
-    model = SeqBindPretrain(config=config).to(device)
-    # ckp_dir = '/home/fbqc9/Workspace/MCLLM_DATA/DATA/saved_models/'
-    # ckp_file = ckp_dir + "pretrained_ontology.pt"
+    ckp_file = f'{ckp_dir}/pretrained_{base_model}.pt'
+    config = load_config('config.yaml')['pretraining_configs'][base_model]
+    model = SeqBindPretrain(pretrain_config=config).to(device)
+
     print("Loading model checkpoint @ {}".format(ckp_file))
     load_model = load_ckp(filename=ckp_file, model=model, model_only=True)
     return load_model
@@ -71,7 +69,7 @@ def process_ontology(go_graph, ontology_list):
 def get_model(model_name, device):
     model_map = {
         "esm2_t48": ('facebook/esm2_t48_15B_UR50D', EsmTokenizer, EsmModel),
-        "prost5":   ('Rostlab/ProstT5', T5Tokenizer, T5EncoderModel),
+        "prostt5":   ('Rostlab/ProstT5', T5Tokenizer, T5EncoderModel),
         "llama2":   ('meta-llama/Llama-2-7b-hf', AutoTokenizer, AutoModel),
     }
 
@@ -80,9 +78,8 @@ def get_model(model_name, device):
         raise ValueError(f"Model {model_name} is not recognized.")
     
     model_path, tokenizer_class, model_class = model_info
-    # print(f">>>>>>>>>>>>>>>>>........... The model path: {model_path}")
 
-    if 'prost5' in model_name:
+    if 'prostt5' in model_name:
         tokenizer = tokenizer_class.from_pretrained(model_path, do_lower_case=False)
     else:
         tokenizer = tokenizer_class.from_pretrained(model_path)
@@ -98,15 +95,35 @@ def get_model(model_name, device):
     return model.to(device)
 
 
-def get_embeddings(model, data, modality, device):
+def _preprocess(data, modality):
+    data = str(data)
 
     if modality == "Sequence":
-        data = str(data)
-    if modality == "Structure":
+        data = str(data).upper()
+    elif modality == "Structure":
         data = str(data).lower()
-        data = re.sub(r"[UZOB]", "X", data)
-        data = " ".join(list(data))
+
+    data = re.sub(r"[UZOB]", "X", data)
+    data = " ".join(list(data))
+
+    if modality == "Sequence":
+        data = "<AA2fold>" + " " + data
+    elif modality == "Structure":
         data = "<fold2AA>" + " " + data
+
+    return data
+    
+
+
+def get_embeddings(model, base_model, data, modality, device):
+
+    if modality == "Sequence":
+        if base_model == "prostt5":
+            data = _preprocess(data, modality)
+        else:
+            data = str(data)
+    if modality == "Structure":
+        data  =  _preprocess(data, modality)
 
     if modality == "Text" or modality == "Interpro" or modality == "Ontology":
         inputs = model.tokenizer(data, return_tensors="pt", max_length=1024, padding='max_length', truncation=True)
@@ -124,24 +141,23 @@ def get_embeddings(model, data, modality, device):
     return outputs
 
 
-def generate_embeddings(data, modality="Sequence"):
+def generate_embeddings(data, base_model, modality="Sequence"):
     embeddings = {}
 
     if modality == "Sequence":
-        model = get_model("esm2_t48", args.device)
+        if base_model == "prostt5":
+            model = get_model("prostt5", args.device)
+        elif base_model == "esm2":
+            model = get_model("esm2_t48", args.device)
     elif modality == "Structure":
-        model = get_model("prost5", args.device)
+        model = get_model("prostt5", args.device)
     else:
         model = get_model("llama2", args.device)
 
     for protein, values in data.items():
         raw_data = values[modality]
-        embeddings[protein] = get_embeddings(model, raw_data, modality, device=args.device)
+        embeddings[protein] = get_embeddings(model, base_model, raw_data, modality, device=args.device)
 
-
-    print(embeddings)
-
-    exit()
     return embeddings
 
 
@@ -180,13 +196,12 @@ if __name__ == '__main__':
     parser.add_argument('--modality', type=str, required=True, choices=['Sequence', 'Structure', 'Text', 'Interpro'], help="Input modality type")
     parser.add_argument('--ontology-path', type=str, required=True, help="Path to list of ontology terms")
     parser.add_argument('--go-graph', type=str, required=True, help="Path to ontology file(OBO)")
-    parser.add_argument('--model-checkpoint', type=str, required=True, help="Path to the pretrained model checkpoint.")
-    parser.add_argument('--batch', type=int, help="BatchSize", default=3)
+    parser.add_argument('--model-checkpoint-path', type=str, required=True, help="Path to the pretrained model checkpoint.")
+    parser.add_argument('--base-model', type=str, choices=['esm2', 'prostt5'], default='esm2', help='Base model to use.')
     parser.add_argument('--topk', type=int, help="Top K", default=1)
     parser.add_argument('--device', type=str, default='cpu', help="Device to run inference on (cuda or cpu).")
 
     args = parser.parse_args()
-
 
     if args.modality == 'Sequence':
         data = combine_modalities(sequence_data=args.input_path, use_sequence=False)
@@ -197,18 +212,17 @@ if __name__ == '__main__':
     elif args.modality == 'Interpro':
         data = combine_modalities(interpro_data=args.input_path, use_sequence=False)
 
-    modality_embeddings = generate_embeddings(data, args.modality)
+    modality_embeddings = generate_embeddings(data, args.base_model, args.modality)
 
     # Change to include term names
     terms, term_names = load_ontology_list(args.ontology_path)
     go_graph = load_graph(args.go_graph)
     ontology_text = process_ontology(go_graph, terms)
-    ontology_embeddings = get_embeddings(get_model("llama2", args.device), ontology_text, "Ontology", device=args.device)
+    ontology_embeddings = get_embeddings(get_model("llama2", args.device), args.base_model, ontology_text, "Ontology", device=args.device)
 
     # Load model
-    model = load_model(args.device, args.model_checkpoint)
+    model = load_model(args.device, args.model_checkpoint_path, args.base_model)
     model.eval()
-
 
     similarities = compute_similarity(modality=args.modality,
                                       model=model, 

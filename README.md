@@ -126,8 +126,8 @@ Ontology annotations (e.g., Gene Ontology terms) should be provided in a simple 
         --modality {Sequence,Structure,Text,Interpro} \
         --ontology-path ONTOLOGY_PATH \
         --go-graph GO_GRAPH \
-        --model-checkpoint MODEL_CHECKPOINT \
-        [--batch BATCH] \
+        --model-checkpoint-path MODEL_CHECKPOINT_PATH \
+        [--base-model {esm2,prostt5}] \
         [--topk TOPK] \
         [--device DEVICE]
 ```
@@ -138,10 +138,10 @@ To run zero-shot inference using Text modality on the sample data in the example
 
 ```bash
 python zeroshot_inference.py \
-    --model-checkpoint /path/to/funbind_checkpoint.pth \
-    --input-path examples/text.txt \
+    --model-checkpoint-path ./checkpoints/saved_models \
+    --input-path examples/zeroshot/text.txt \
     --modality Text \
-    --ontology-path examples/ontology.txt \
+    --ontology-path examples/zeroshot/ontology.txt \
     --go-graph examples/go-basic.obo
 ```
 
@@ -170,7 +170,6 @@ Top 3 term: ('GO:0170039',), Score: 1.13%
 ```
 
 
-
 <h3 id="classification-inference"> Classification Inference</h3>
 
 
@@ -182,6 +181,7 @@ Top 3 term: ('GO:0170039',), Score: 1.13%
       [--text-path TEXT_PATH]
       [--interpro-path INTERPRO_PATH] 
       [--ontology ONTOLOGY] 
+      [--base-model {esm2,prostt5}]
       [--device DEVICE]
       [--num-batches NUM_BATCHES] 
       [--working-dir WORKING_DIR] 
@@ -194,9 +194,14 @@ Top 3 term: ('GO:0170039',), Score: 1.13%
 To run classification using the sample data provided in the examples/ directory:"
 
 ```bash
-python python classification_inference.py --sequence-path examples/sequence.fasta --structure-path examples/structure.fasta --data-path /home/fbqc9/Workspace/MCLLM_DATA/DATA/inference --device cuda:0
+python classification_inference.py \
+    --sequence-path examples/classification/text.txt \
+    --structure-path examples/classification/text.txt \
+    --text-path examples/classification/text.txt \
+    --interpro-path examples/classification/text.txt \
+    --data-path ./checkpoints/saved_models \
+    --device cpu
 ```
-
 
 </details>
 
