@@ -1,0 +1,95 @@
+
+mf_dims: &mf_base [1440, 1504, 1529]
+cc_dims: &cc_base [1120, 1056, 1043]
+bp_dims: &bp_base [1440, 1568, 1631]
+
+esm2_config: &esm2_base
+  model: esm2_t48
+  input_dim: 5120
+  output_dim: 1280
+  expert_configs:
+    - [3072, 1440, 1280]
+    - [1600, 1440, 1280]
+    - [1440, 1280]
+
+prost5_config: &prost5_base
+  model: prost5
+  input_dim: 1024
+  output_dim: 1280
+  expert_configs:
+    - [1088, 1152, 1280]
+    - [1600, 1248, 1280]
+    - [1024, 1280]
+
+llama2_config: &llama2_base
+  model: llama2
+  input_dim: 4096
+  output_dim: 1280
+  expert_configs:
+    - [2048, 1440, 1280]
+    - [1536, 1440, 1280]
+    - [1440, 1280]
+
+biobert_config: &biobert_base
+  model: biobert
+  input_dim: 1024
+  output_dim: 1280
+  expert_configs:
+    - [1088, 1152, 1280]
+    - [1600, 1248, 1280]
+    - [1024, 1280]
+
+
+pretraining_configs:
+  esm2:
+    Sequence: *esm2_base
+    Structure: *prost5_base
+    Text: *llama2_base
+    Interpro: *llama2_base
+    Ontology: *llama2_base
+      
+  prostt5:
+    Sequence: *prost5_base
+    Structure: *prost5_base
+    Text: *llama2_base
+    Interpro: *llama2_base
+    Ontology: *llama2_base
+
+  biobert:
+    Sequence: *esm2_base
+    Structure: *prost5_base
+    Text: *biobert_base
+    Interpro: *biobert_base
+    Ontology: *llama2_base
+
+ontology: &ontology_dims
+  MF: 
+    Sequence: 
+      - *mf_base  
+    Structure: 
+      - *mf_base  
+    Text: 
+     - *mf_base  
+    Interpro: 
+      - *mf_base  
+  CC: 
+    Sequence: 
+      - *cc_base
+    Structure: 
+      - *cc_base
+    Text: 
+      - *cc_base
+    Interpro: 
+      - *cc_base
+  BP: 
+    Sequence: 
+      - *bp_base
+    Structure: 
+      - *bp_base
+    Text: 
+      - *bp_base
+    Interpro: 
+      - *bp_base
+      
+classification_configs:
+  <<: *ontology_dims
