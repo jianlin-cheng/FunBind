@@ -43,10 +43,10 @@ The resulting **3Di FASTA** file can then be used as input to **FunBind**, an ex
 **Example:** [$PWD/checkpoints/examples/classification/structure.fasta`]($PWD/checkpoints/examples/classification/structure.fasta)
 
 
-- &#128221; Text Modality
+- &#128221; Text Modality (Best single Modality)
 
   Text descriptions should follow the **[UniProt Flat Text format](http://web.expasy.org/docs/userman.html)**.  
-You can download data using the [**UniProt ID Mrooting Tool**](https://www.uniprot.org/id-mrooting). An example can be found at your cache-path: $PWD/checkpoints/examples/classification.  
+You can download data as text format using the [**UniProt ID Mrooting Tool**](https://www.uniprot.org/id-mrooting). An example can be found at your cache-path: $PWD/checkpoints/examples/classification.  
 **Example:** [`$PWD/checkpoints/examples/classification/text.txt`]($PWD/checkpoints/examples/classification/text.txt)
 
 - &#129513; InterPro Modality
