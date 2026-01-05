@@ -28,7 +28,7 @@ This Docker container implements a multi-modality based FunBind protein function
 - 3. **Save Predictions**: Save the predicted results into a customized folder provided by user.
 
 
-## &#128218; Input Dataset Format for each modality 
+## &#128218; Input Dataset Format for each modality (Best single modality:Text) 
 
 - &#129516; Sequence Modality
 
