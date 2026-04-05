@@ -83,6 +83,8 @@ The container should be built after all scripts have been generated/collected.
 # From the funbind_container directory
 docker build --network=host -t funbind_predictor .
 
+# Alternatively download the funbind_container from our dockerhub as bellow
+docker pull yw7bh/funbind_predictor:latest 
 ```
 
 ## &#128293; Running the Container with Model Caching
