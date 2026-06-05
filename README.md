@@ -51,8 +51,9 @@ cd FunBind
    wget url-for-data
    downloaded-data
 -->
-```
-https://calla.rnet.missouri.edu/rnaminer/funbinddata/DATA/saved_models/
+```bash
+# Example: download our checkpoints to a folder named 'checkpoints' in your current working directory.
+wget -r -np -nH --cut-dirs=4 -R "index.html*" -P "$PWD/checkpoints" https://calla.rnet.missouri.edu/rnaminer/funbinddata/DATA/data/ 
 ```
 
 3. Set Up the Conda Environment:
@@ -174,7 +175,7 @@ Top 3 term: ('GO:0170039',), Score: 1.13%
 
 
 ```bash
-    python classification_inference.py [-h] 
+    python classification.py [-h] 
       --data-path DATA_PATH 
       [--sequence-path SEQUENCE_PATH]
       [--structure-path STRUCTURE_PATH] 
@@ -194,7 +195,7 @@ Top 3 term: ('GO:0170039',), Score: 1.13%
 To run classification using the sample data provided in the examples/ directory:"
 
 ```bash
-python classification_inference.py \
+python classification.py \
     --sequence-path examples/classification/text.txt \
     --structure-path examples/classification/text.txt \
     --text-path examples/classification/text.txt \
