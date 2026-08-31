@@ -54,7 +54,7 @@ cd FunBind
 The training and validation data can be downloaded at [**zenodo**](https://doi.org/10.5281/zenodo.22137309).
 The model weights and test data can be downloaded at [**zenodo**](https://doi.org/10.5281/zenodo.22137037).
 ```bash
-# Example: download our checkpoints to a folder named 'checkpoints' in your current working directory.
+# Note: bellow link does not work and more.
 wget -r -np -nH --cut-dirs=4 -R "index.html*" -P "$PWD/checkpoints" https://calla.rnet.missouri.edu/rnaminer/funbinddata/DATA/data/ 
 ```
 
