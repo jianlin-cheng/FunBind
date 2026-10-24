@@ -297,5 +297,5 @@ This project is covered under the MIT License
 
 <h2 id="citation"> &#128214;  Citing this work Inference</h2>
 <details>
-Boadu, F., Wang, Y., Cheng, J. A unified multimodal model for generalizable zero-shot and supervised protein function prediction. Submitted. 
+Boadu, F., Wang, Y., & Cheng, J. (2026). A unified multimodal model for generalizable zero-shot and supervised protein function prediction. Bioinformatics, 42(6), btag356.
 </details>
